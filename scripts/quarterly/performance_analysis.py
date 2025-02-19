@@ -2,248 +2,231 @@
 """
 Quarterly performance analysis script.
 Analyzes:
-1. Code execution performance
-2. Resource usage trends
-3. API response times
-4. System bottlenecks
-5. Historical metrics
+1. API response times
+2. Resource usage (CPU, Memory, Disk)
+3. Error rates
+4. Performance patterns
+5. Long-term trends
 """
 
 import os
 import sys
+import subprocess
 import json
-import glob
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
+import logging
 
-def load_historical_metrics() -> pd.DataFrame:
-    """Load and combine historical metrics from logs."""
-    metrics_dir = Path(".cursor/logs")
-    metrics_files = []
-    
-    # Load dependency check logs
-    dep_logs = glob.glob(str(metrics_dir / "dependency_checks/dependency_check_*.txt"))
-    for log in dep_logs:
-        with open(log, "r") as f:
-            date = datetime.strptime(log.split("_")[-1].split(".")[0], "%Y%m%d")
-            metrics_files.append({
-                "date": date,
-                "type": "dependency",
-                "content": f.read()
-            })
-    
-    # Load code quality logs
-    quality_logs = glob.glob(str(metrics_dir / "code_quality/code_quality_*.txt"))
-    for log in quality_logs:
-        with open(log, "r") as f:
-            date = datetime.strptime(log.split("_")[-1].split(".")[0], "%Y%m%d")
-            metrics_files.append({
-                "date": date,
-                "type": "quality",
-                "content": f.read()
-            })
-    
-    # Load security audit logs
-    security_logs = glob.glob(str(metrics_dir / "security_audits/security_audit_*.txt"))
-    for log in security_logs:
-        with open(log, "r") as f:
-            date = datetime.strptime(log.split("_")[-1].split(".")[0], "%Y%m%d")
-            metrics_files.append({
-                "date": date,
-                "type": "security",
-                "content": f.read()
-            })
-    
-    return pd.DataFrame(metrics_files)
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
-def analyze_performance_trends(metrics_df: pd.DataFrame) -> Dict[str, Any]:
-    """Analyze performance trends from historical data."""
-    trends = {}
-    
-    # Analyze frequency of issues
-    for metric_type in metrics_df["type"].unique():
-        type_data = metrics_df[metrics_df["type"] == metric_type]
-        trends[f"{metric_type}_frequency"] = len(type_data) / 90  # Issues per day
-    
-    # Analyze issue patterns
-    for metric_type in metrics_df["type"].unique():
-        type_data = metrics_df[metrics_df["type"] == metric_type]
-        content_series = type_data["content"].str.lower()
-        
-        # Count common issues
-        trends[f"{metric_type}_issues"] = {
-            "errors": content_series.str.count("error").mean(),
-            "warnings": content_series.str.count("warning").mean(),
-            "critical": content_series.str.count("critical").mean()
-        }
-    
-    return trends
+def check_response_times() -> Dict[str, List[Dict[str, Any]]]:
+    """Check API endpoint response times using ab-bench."""
+    try:
+        result = subprocess.run(
+            ['ab-bench', 'analyze', '--json'],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        return json.loads(result.stdout)
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        logger.error(f"Error checking response times: {str(e)}")
+        return {}
 
-def generate_visualizations(
-    metrics_df: pd.DataFrame,
-    trends: Dict[str, Any],
-    output_dir: Path
-) -> None:
-    """Generate visualization plots for the analysis."""
-    # Set style
-    plt.style.use("seaborn")
-    
-    # Issue Frequency Over Time
-    plt.figure(figsize=(12, 6))
-    for metric_type in metrics_df["type"].unique():
-        type_data = metrics_df[metrics_df["type"] == metric_type]
-        plt.plot(type_data["date"], range(len(type_data)), label=metric_type)
-    
-    plt.title("Cumulative Issues Over Time")
-    plt.xlabel("Date")
-    plt.ylabel("Number of Issues")
-    plt.legend()
-    plt.savefig(output_dir / "issue_frequency.png")
-    plt.close()
-    
-    # Issue Severity Distribution
-    plt.figure(figsize=(10, 6))
-    severity_data = []
-    for metric_type, issues in trends.items():
-        if metric_type.endswith("_issues"):
-            for severity, count in issues.items():
-                severity_data.append({
-                    "type": metric_type.replace("_issues", ""),
-                    "severity": severity,
-                    "count": count
-                })
-    
-    severity_df = pd.DataFrame(severity_data)
-    sns.barplot(data=severity_df, x="type", y="count", hue="severity")
-    plt.title("Issue Severity Distribution")
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.savefig(output_dir / "severity_distribution.png")
-    plt.close()
+def check_resource_usage() -> Dict[str, List[Dict[str, Any]]]:
+    """Check system resource usage trends."""
+    try:
+        result = subprocess.run(
+            ['sys-metrics', 'collect', '--json'],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        return json.loads(result.stdout)
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        logger.error(f"Error checking resource usage: {str(e)}")
+        return {}
 
-def analyze_resource_usage():
-    """Analyze system resource usage trends."""
-    resource_data = {
-        "cpu_usage": [],
-        "memory_usage": [],
-        "disk_usage": []
-    }
-    
-    # This is a placeholder for actual resource monitoring
-    # In a real implementation, you would:
-    # 1. Collect metrics from your monitoring system
-    # 2. Analyze resource usage patterns
-    # 3. Identify bottlenecks
-    
-    return resource_data
+def check_error_rates() -> Dict[str, List[Dict[str, Any]]]:
+    """Analyze API error rates from logs."""
+    try:
+        result = subprocess.run(
+            ['log-analyzer', 'errors', '--json'],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        return json.loads(result.stdout)
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        logger.error(f"Error checking error rates: {str(e)}")
+        return {}
 
-def generate_report(
-    metrics_df: pd.DataFrame,
-    trends: Dict[str, Any],
-    resources: Dict[str, List[float]]
-) -> None:
-    """Generate a comprehensive performance analysis report."""
-    report_dir = Path(".cursor/logs/performance_analysis")
-    report_dir.mkdir(parents=True, exist_ok=True)
-    
-    # Create visualizations directory
-    viz_dir = report_dir / "visualizations"
-    viz_dir.mkdir(exist_ok=True)
-    
-    # Generate visualizations
-    generate_visualizations(metrics_df, trends, viz_dir)
-    
-    report_path = report_dir / f"performance_analysis_{datetime.now().strftime('%Y%m%d')}.txt"
-    
-    with open(report_path, "w") as f:
-        f.write("Quarterly Performance Analysis\n")
-        f.write("===========================\n\n")
-        
-        # Metrics Summary
-        f.write("Metrics Summary\n")
-        f.write("--------------\n")
-        f.write(f"Analysis Period: {metrics_df['date'].min()} to {metrics_df['date'].max()}\n")
-        f.write(f"Total Records Analyzed: {len(metrics_df)}\n\n")
-        
-        # Issue Trends
-        f.write("Issue Trends\n")
-        f.write("------------\n")
-        for metric_type in metrics_df["type"].unique():
-            frequency = trends.get(f"{metric_type}_frequency", 0)
-            f.write(f"\n{metric_type.title()} Issues:\n")
-            f.write(f"- Frequency: {frequency:.2f} issues per day\n")
-            
-            issues = trends.get(f"{metric_type}_issues", {})
-            for severity, count in issues.items():
-                f.write(f"- {severity.title()}: {count:.2f} average per report\n")
-        
-        # Resource Usage
-        f.write("\nResource Usage\n")
-        f.write("--------------\n")
-        for resource, values in resources.items():
-            if values:  # Skip empty metrics
-                avg_usage = sum(values) / len(values)
-                max_usage = max(values)
-                f.write(f"\n{resource.replace('_', ' ').title()}:\n")
-                f.write(f"- Average: {avg_usage:.2f}%\n")
-                f.write(f"- Peak: {max_usage:.2f}%\n")
-        
-        # Visualizations
-        f.write("\nVisualizations\n")
-        f.write("--------------\n")
-        f.write("Generated visualizations can be found in the 'visualizations' directory:\n")
-        f.write("1. issue_frequency.png - Cumulative issues over time\n")
-        f.write("2. severity_distribution.png - Distribution of issue severities\n")
-        
-        # Recommendations
-        f.write("\nRecommendations\n")
-        f.write("---------------\n")
-        recommendations = []
-        
-        # Analyze issue trends for recommendations
-        for metric_type in metrics_df["type"].unique():
-            issues = trends.get(f"{metric_type}_issues", {})
-            if issues.get("critical", 0) > 1:
-                recommendations.append(
-                    f"- Address high number of critical {metric_type} issues"
-                )
-            if issues.get("errors", 0) > 5:
-                recommendations.append(
-                    f"- Investigate frequent {metric_type} errors"
-                )
-        
-        # Resource-based recommendations
-        for resource, values in resources.items():
-            if values and max(values) > 80:  # High resource usage
-                recommendations.append(
-                    f"- Optimize {resource.replace('_', ' ')} usage"
-                )
-        
-        if recommendations:
-            f.write("\n".join(recommendations))
-        else:
-            f.write("No critical performance issues identified. Continue monitoring.")
+def check_performance_patterns() -> Dict[str, List[Dict[str, Any]]]:
+    """Identify recurring performance patterns."""
+    try:
+        result = subprocess.run(
+            ['perf-pattern', 'analyze', '--json'],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        return json.loads(result.stdout)
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        logger.error(f"Error checking performance patterns: {str(e)}")
+        return {}
 
-def main():
-    print("Running quarterly performance analysis...")
+def analyze_performance_trends(performance_data: Dict[str, Any]) -> str:
+    """Analyze performance trends and provide recommendations."""
+    analysis = []
     
-    # Load historical data
-    metrics_df = load_historical_metrics()
-    
-    # Analyze trends
-    trends = analyze_performance_trends(metrics_df)
+    # Analyze response times
+    if "response_times" in performance_data:
+        analysis.append("Response Time Analysis:")
+        for endpoint in performance_data["response_times"]:
+            analysis.append(
+                f"Endpoint: {endpoint['path']} ({endpoint['method']})\n"
+                f"  Average: {endpoint.get('avg_response_time', 'N/A')}ms\n"
+                f"  P95: {endpoint.get('p95_response_time', 'N/A')}ms\n"
+                f"  P99: {endpoint.get('p99_response_time', 'N/A')}ms"
+            )
     
     # Analyze resource usage
-    resources = analyze_resource_usage()
+    if "resource_usage" in performance_data:
+        analysis.append("\nResource Usage Analysis:")
+        
+        # CPU Analysis
+        if "cpu" in performance_data["resource_usage"]:
+            cpu_data = performance_data["resource_usage"]["cpu"]
+            avg_cpu = sum(d["usage_percent"] for d in cpu_data) / len(cpu_data) if cpu_data else 0
+            analysis.append(f"CPU Usage:\n  Average: {avg_cpu:.1f}%")
+        
+        # Memory Analysis
+        if "memory" in performance_data["resource_usage"]:
+            memory_data = performance_data["resource_usage"]["memory"]
+            avg_memory = sum(d["usage_mb"] for d in memory_data) / len(memory_data) if memory_data else 0
+            analysis.append(f"Memory Usage:\n  Average: {avg_memory:.1f}MB")
+        
+        # Disk Analysis
+        if "disk" in performance_data["resource_usage"]:
+            disk_data = performance_data["resource_usage"]["disk"]
+            avg_disk = sum(d["usage_percent"] for d in disk_data) / len(disk_data) if disk_data else 0
+            analysis.append(f"Disk Usage:\n  Average: {avg_disk:.1f}%")
     
-    # Generate report
-    generate_report(metrics_df, trends, resources)
+    return "\n".join(analysis)
+
+def generate_report(
+    response_data: Dict[str, List[Dict[str, Any]]],
+    resource_data: Dict[str, List[Dict[str, Any]]],
+    error_data: Dict[str, List[Dict[str, Any]]],
+    patterns_data: Dict[str, List[Dict[str, Any]]]
+) -> Path:
+    """Generate a comprehensive performance analysis report."""
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_dir = Path(".cursor") / "logs" / "performance_analysis"
+    log_dir.mkdir(parents=True, exist_ok=True)
     
-    print("\nAnalysis complete. Report generated in .cursor/logs/performance_analysis/")
+    report_path = log_dir / f"performance_report_{timestamp}.txt"
+    
+    with open(report_path, 'w') as f:
+        f.write("=== Performance Analysis Report ===\n")
+        f.write(f"Generated: {datetime.now().isoformat()}\n\n")
+        
+        # Response Times
+        f.write("=== API Response Times ===\n")
+        if response_data.get("endpoints"):
+            for endpoint in response_data["endpoints"]:
+                f.write(
+                    f"Endpoint: {endpoint['path']} ({endpoint['method']})\n"
+                    f"Average Response Time: {endpoint['avg_response_time']}ms\n\n"
+                )
+        else:
+            f.write("No response time data available.\n\n")
+        
+        # Resource Usage
+        f.write("=== Resource Usage ===\n")
+        if resource_data.get("cpu_usage"):
+            f.write("CPU Usage:\n")
+            for usage in resource_data["cpu_usage"]:
+                f.write(f"  {usage['usage_percent']}%\n")
+        
+        if resource_data.get("memory_usage"):
+            f.write("\nMemory Usage:\n")
+            for usage in resource_data["memory_usage"]:
+                f.write(f"  {usage['usage_mb']}MB\n")
+        
+        if resource_data.get("disk_usage"):
+            f.write("\nDisk Usage:\n")
+            for usage in resource_data["disk_usage"]:
+                f.write(f"  {usage['usage_percent']}%\n")
+        f.write("\n")
+        
+        # Error Rates
+        f.write("=== Error Rates ===\n")
+        if error_data.get("error_rates"):
+            for error in error_data["error_rates"]:
+                f.write(
+                    f"Endpoint: {error['endpoint']}\n"
+                    f"Error Rate: {error['error_rate']*100:.2f}%\n\n"
+                )
+        else:
+            f.write("No error rate data available.\n\n")
+        
+        # Performance Patterns
+        f.write("=== Performance Patterns ===\n")
+        if patterns_data.get("patterns"):
+            for pattern in patterns_data["patterns"]:
+                f.write(
+                    f"Pattern: {pattern['type']}\n"
+                    f"Frequency: {pattern['frequency']}\n\n"
+                )
+        else:
+            f.write("No performance patterns detected.\n\n")
+        
+        # Trend Analysis
+        f.write("=== Trend Analysis ===\n")
+        f.write(analyze_performance_trends({
+            "response_times": response_data.get("endpoints", []),
+            "resource_usage": {
+                "cpu": resource_data.get("cpu_usage", []),
+                "memory": resource_data.get("memory_usage", []),
+                "disk": resource_data.get("disk_usage", [])
+            }
+        }))
+    
+    logger.info(f"Report generated: {report_path}")
+    return report_path
+
+def main():
+    """Run quarterly performance analysis."""
+    logger.info("Starting quarterly performance analysis...")
+    
+    response_data = check_response_times()
+    logger.info("Completed response time analysis")
+    
+    resource_data = check_resource_usage()
+    logger.info("Completed resource usage analysis")
+    
+    error_data = check_error_rates()
+    logger.info("Completed error rate analysis")
+    
+    patterns_data = check_performance_patterns()
+    logger.info("Completed performance pattern analysis")
+    
+    report_path = generate_report(
+        response_data,
+        resource_data,
+        error_data,
+        patterns_data
+    )
+    
+    logger.info("Quarterly performance analysis completed")
+    logger.info(f"Report available at: {report_path}")
 
 if __name__ == "__main__":
     main() 

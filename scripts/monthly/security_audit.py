@@ -16,192 +16,207 @@ import json
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Any
+import re
+import logging
 
-def check_dependencies_security():
-    """Check for known vulnerabilities using safety."""
-    print("Checking for known vulnerabilities...")
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+def check_dependency_vulnerabilities() -> Dict[str, List[Dict[str, Any]]]:
+    """Check for known vulnerabilities in dependencies using safety."""
     try:
         result = subprocess.run(
-            ["safety", "check", "--json"],
+            ['safety', 'check', '--json'],
             capture_output=True,
-            text=True
+            text=True,
+            check=True
         )
-        return json.loads(result.stdout) if result.stdout else {}
-    except FileNotFoundError:
-        print("safety not found. Install with: pip install safety")
+        return json.loads(result.stdout)
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        logger.error(f"Error checking dependencies: {str(e)}")
         return {}
 
-def scan_for_secrets():
-    """Scan for hardcoded secrets using detect-secrets."""
-    print("\nScanning for hardcoded secrets...")
+def check_secrets_exposure() -> Dict[str, List[Dict[str, Any]]]:
+    """Check for exposed secrets using detect-secrets."""
     try:
         result = subprocess.run(
-            ["detect-secrets", "scan", "."],
+            ['detect-secrets', 'scan', '--all-files', '--json'],
             capture_output=True,
-            text=True
+            text=True,
+            check=True
         )
-        return json.loads(result.stdout) if result.stdout else {}
-    except FileNotFoundError:
-        print("detect-secrets not found. Install with: pip install detect-secrets")
+        return json.loads(result.stdout)
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        logger.error(f"Error checking for secrets: {str(e)}")
         return {}
 
-def check_security_patterns():
-    """Check for security anti-patterns using bandit."""
-    print("\nChecking for security anti-patterns...")
+def check_security_patterns() -> Dict[str, List[Dict[str, Any]]]:
+    """Check for common security anti-patterns using bandit."""
     try:
         result = subprocess.run(
-            ["bandit", "-r", ".", "-f", "json"],
+            ['bandit', '-r', '.', '-f', 'json'],
             capture_output=True,
-            text=True
+            text=True,
+            check=True
         )
-        return json.loads(result.stdout) if result.stdout else {}
-    except FileNotFoundError:
-        print("bandit not found. Install with: pip install bandit")
+        return json.loads(result.stdout)
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        logger.error(f"Error checking security patterns: {str(e)}")
         return {}
 
-def check_api_key_rotation():
-    """Check API key age and rotation needs."""
-    print("\nChecking API key rotation needs...")
-    rotation_data = {}
+def check_api_key_rotation() -> Dict[str, List[Dict[str, Any]]]:
+    """Check API key rotation dates from comments in configuration files."""
+    api_keys = []
+    rotation_pattern = re.compile(r'API_KEY.*?#.*?Last rotated: (\d{4}-\d{2}-\d{2})')
     
-    # Check .env file modification time
-    if os.path.exists(".env"):
-        env_stat = os.stat(".env")
-        last_modified = datetime.fromtimestamp(env_stat.st_mtime)
-        days_old = (datetime.now() - last_modified).days
-        
-        rotation_data["env_file"] = {
-            "last_modified": last_modified.isoformat(),
-            "days_old": days_old,
-            "needs_rotation": days_old > 90  # Recommend rotation after 90 days
-        }
+    try:
+        config_files = Path('.').glob('**/*.py')
+        for file in config_files:
+            if file.is_file():
+                content = file.read_text()
+                matches = rotation_pattern.findall(content)
+                if matches:
+                    for last_rotation in matches:
+                        api_keys.append({
+                            "file": str(file),
+                            "last_rotation": last_rotation
+                        })
+    except Exception as e:
+        logger.error(f"Error checking API key rotation: {str(e)}")
     
-    return rotation_data
+    return {"api_keys": api_keys}
 
-def analyze_security_findings(
-    vulnerabilities: Dict[str, Any],
-    secrets: Dict[str, Any],
-    patterns: Dict[str, Any],
-    rotation: Dict[str, Any]
-) -> List[str]:
-    """Analyze security findings and generate recommendations."""
-    recommendations = []
+def analyze_security_trends(security_data: Dict[str, Any]) -> str:
+    """Analyze trends in security scan data."""
+    analysis = []
     
     # Analyze vulnerabilities
-    if vulnerabilities:
-        for vuln in vulnerabilities:
-            recommendations.append(
-                f"- Update {vuln.get('package')}: {vuln.get('description')}"
+    analysis.append("High Severity Vulnerabilities:")
+    for vuln in security_data.get("vulnerabilities", []):
+        if vuln.get("severity") == "HIGH":
+            analysis.append(
+                f"{vuln['package']} {vuln['version']} - "
+                f"{vuln.get('description', 'No description')} "
+                f"(Fix version: {vuln.get('fix_version', 'unknown')})"
             )
     
-    # Analyze secrets
-    if secrets.get("results"):
-        for file_path, secret_list in secrets["results"].items():
-            if secret_list:
-                recommendations.append(
-                    f"- Remove hardcoded secrets from {file_path}"
-                )
-    
-    # Analyze security patterns
-    if patterns.get("results"):
-        for result in patterns["results"]:
-            if result.get("issue_severity") in ("HIGH", "MEDIUM"):
-                recommendations.append(
-                    f"- Fix {result.get('issue_text')} in {result.get('filename')}"
-                )
-    
-    # Analyze key rotation
-    if rotation.get("env_file", {}).get("needs_rotation"):
-        recommendations.append(
-            "- Rotate API keys (last rotation: "
-            f"{rotation['env_file']['days_old']} days ago)"
+    # Analyze exposed secrets
+    analysis.append("\nExposed Secrets:")
+    for secret in security_data.get("secrets", []):
+        analysis.append(
+            f"{secret['file']}:{secret.get('line', 'unknown')} - "
+            f"Type: {secret.get('type', 'unknown')} "
+            f"(Severity: {secret.get('severity', 'unknown')})"
         )
     
-    return recommendations
+    return "\n".join(analysis)
 
 def generate_report(
-    vulnerabilities: Dict[str, Any],
-    secrets: Dict[str, Any],
-    patterns: Dict[str, Any],
-    rotation: Dict[str, Any]
-) -> None:
+    vulnerability_data: Dict[str, List[Dict[str, Any]]],
+    secrets_data: Dict[str, List[Dict[str, Any]]],
+    patterns_data: Dict[str, List[Dict[str, Any]]],
+    api_keys_data: Dict[str, List[Dict[str, Any]]]
+) -> Path:
     """Generate a comprehensive security audit report."""
-    report_dir = Path(".cursor/logs/security_audits")
-    report_dir.mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_dir = Path(".cursor") / "logs" / "security_audits"
+    log_dir.mkdir(parents=True, exist_ok=True)
     
-    report_path = report_dir / f"security_audit_{datetime.now().strftime('%Y%m%d')}.txt"
+    report_path = log_dir / f"security_audit_{timestamp}.txt"
     
-    with open(report_path, "w") as f:
-        f.write("Security Audit Report\n")
-        f.write("===================\n\n")
+    with open(report_path, 'w') as f:
+        f.write("=== Security Audit Report ===\n")
+        f.write(f"Generated: {datetime.now().isoformat()}\n\n")
         
         # Dependency Vulnerabilities
-        f.write("Known Vulnerabilities\n")
-        f.write("--------------------\n")
-        if vulnerabilities:
-            for vuln in vulnerabilities:
-                f.write(f"Package: {vuln.get('package')}\n")
-                f.write(f"Severity: {vuln.get('severity')}\n")
-                f.write(f"Description: {vuln.get('description')}\n\n")
+        f.write("=== Dependency Vulnerabilities ===\n")
+        if vulnerability_data.get("vulnerabilities"):
+            for vuln in vulnerability_data["vulnerabilities"]:
+                f.write(
+                    f"Package: {vuln['package']} {vuln['version']}\n"
+                    f"Severity: {vuln.get('severity', 'unknown')}\n"
+                    f"Description: {vuln.get('description', 'No description')}\n"
+                    f"Fix Version: {vuln.get('fix_version', 'unknown')}\n\n"
+                )
         else:
-            f.write("No known vulnerabilities found.\n")
+            f.write("No vulnerabilities found.\n\n")
         
-        # Hardcoded Secrets
-        f.write("\nHardcoded Secrets\n")
-        f.write("-----------------\n")
-        if secrets.get("results"):
-            for file_path, secret_list in secrets["results"].items():
-                if secret_list:
-                    f.write(f"\nFile: {file_path}\n")
-                    f.write(f"Found {len(secret_list)} potential secrets\n")
+        # Exposed Secrets
+        f.write("=== Exposed Secrets ===\n")
+        if secrets_data.get("exposed_secrets"):
+            for secret in secrets_data["exposed_secrets"]:
+                f.write(
+                    f"File: {secret['file']}\n"
+                    f"Line: {secret.get('line', 'unknown')}\n"
+                    f"Type: {secret.get('type', 'unknown')}\n"
+                    f"Severity: {secret.get('severity', 'unknown')}\n\n"
+                )
         else:
-            f.write("No hardcoded secrets found.\n")
+            f.write("No exposed secrets found.\n\n")
         
-        # Security Anti-patterns
-        f.write("\nSecurity Anti-patterns\n")
-        f.write("---------------------\n")
-        if patterns.get("results"):
-            for result in patterns["results"]:
-                f.write(f"\nIssue: {result.get('issue_text')}\n")
-                f.write(f"Severity: {result.get('issue_severity')}\n")
-                f.write(f"File: {result.get('filename')}\n")
-                f.write(f"Line: {result.get('line_number')}\n")
+        # Security Patterns
+        f.write("=== Security Anti-patterns ===\n")
+        if patterns_data.get("issues"):
+            for issue in patterns_data["issues"]:
+                f.write(
+                    f"File: {issue['file']}\n"
+                    f"Line: {issue.get('line', 'unknown')}\n"
+                    f"Pattern: {issue['pattern']}\n"
+                    f"Severity: {issue.get('severity', 'unknown')}\n\n"
+                )
         else:
-            f.write("No security anti-patterns found.\n")
+            f.write("No security anti-patterns found.\n\n")
         
         # API Key Rotation
-        f.write("\nAPI Key Rotation\n")
-        f.write("---------------\n")
-        if rotation.get("env_file"):
-            f.write(f"Last modified: {rotation['env_file']['last_modified']}\n")
-            f.write(f"Days since last rotation: {rotation['env_file']['days_old']}\n")
-            if rotation['env_file']['needs_rotation']:
-                f.write("WARNING: API keys should be rotated\n")
+        f.write("=== API Key Rotation ===\n")
+        if api_keys_data.get("api_keys"):
+            for key in api_keys_data["api_keys"]:
+                f.write(
+                    f"File: {key['file']}\n"
+                    f"Last Rotation: {key['last_rotation']}\n\n"
+                )
         else:
-            f.write("No API keys found for rotation check.\n")
+            f.write("No API keys found or no rotation dates specified.\n\n")
         
-        # Recommendations
-        f.write("\nSecurity Recommendations\n")
-        f.write("----------------------\n")
-        recommendations = analyze_security_findings(
-            vulnerabilities, secrets, patterns, rotation
-        )
-        if recommendations:
-            f.write("\n".join(recommendations))
-        else:
-            f.write("No critical security issues found. Maintain current security standards.")
+        # Security Analysis
+        f.write("=== Security Analysis ===\n")
+        f.write(analyze_security_trends({
+            "vulnerabilities": vulnerability_data.get("vulnerabilities", []),
+            "secrets": secrets_data.get("exposed_secrets", [])
+        }))
+    
+    logger.info(f"Report generated: {report_path}")
+    return report_path
 
 def main():
-    print("Running monthly security audit...")
+    """Run monthly security audit checks."""
+    logger.info("Starting monthly security audit...")
     
-    vulnerabilities = check_dependencies_security()
-    secrets = scan_for_secrets()
-    patterns = check_security_patterns()
-    rotation = check_api_key_rotation()
+    vulnerability_data = check_dependency_vulnerabilities()
+    logger.info("Completed dependency vulnerability check")
     
-    generate_report(vulnerabilities, secrets, patterns, rotation)
+    secrets_data = check_secrets_exposure()
+    logger.info("Completed secrets exposure check")
     
-    print("\nAudit complete. Report generated in .cursor/logs/security_audits/")
+    patterns_data = check_security_patterns()
+    logger.info("Completed security patterns check")
+    
+    api_keys_data = check_api_key_rotation()
+    logger.info("Completed API key rotation check")
+    
+    report_path = generate_report(
+        vulnerability_data,
+        secrets_data,
+        patterns_data,
+        api_keys_data
+    )
+    
+    logger.info("Monthly security audit completed")
+    logger.info(f"Report available at: {report_path}")
 
 if __name__ == "__main__":
     main() 
