@@ -1,36 +1,32 @@
-# Web scraping
-playwright>=1.41.0
-html5lib>=1.1
+# Core Dependencies
+python-dotenv>=1.0.1
+pydantic>=2.10.6
+pytz>=2024.1  # Added for timezone support
 
-# Search engine
-duckduckgo-search>=7.2.1
+# Web and HTTP
+aiohttp>=3.9.3
+requests>=2.32.3
+playwright>=1.50.0
 
-# LLM integration
-openai>=1.59.8 # o1 support
-anthropic>=0.42.0
-python-dotenv>=1.0.0
+# Search Engine
+duckduckgo-search>=7.4.3
+
+# LLM Integration
+openai>=1.63.2
+anthropic>=0.46.0
+google-generativeai>=0.8.4
+grpcio==1.60.1  # Fixed version to prevent warnings
 
 # Testing
-unittest2>=1.1.0
-pytest>=8.0.0
-pytest-asyncio>=0.23.5
+pytest>=8.3.4
+pytest-asyncio>=0.25.3
+pytest-cov>=4.1.0  # Added for coverage reports
 
-# Google Generative AI
-google-generativeai
-
-# gRPC, for Google Generative AI preventing WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
-grpcio==1.60.1
-
-# Data processing and visualization
-yfinance>=0.2.36
-pandas>=2.1.4
-matplotlib>=3.8.2
-seaborn>=0.13.1
-
-# Tabulate for pretty-printing tables
-tabulate
+# Data Processing and Visualization
+pandas>=2.2.3
+matplotlib>=3.10.0
+seaborn>=0.13.2
 
 # Utilities
-aiohttp==3.9.3
-requests>=2.28.0
-uuid
+tabulate>=0.9.0
+tqdm>=4.67.1  # Progress bars
