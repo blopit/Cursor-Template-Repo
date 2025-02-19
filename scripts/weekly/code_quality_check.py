@@ -159,47 +159,71 @@ def generate_report(
     coverage: Dict[str, Any],
     documentation: str,
     style: str
-) -> str:
-    """Generate a comprehensive code quality report."""
+) -> Path:
+    """Generate a comprehensive code quality report.
+    
+    Returns:
+        Path: The path to the generated report file.
+    """
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     log_dir = Path(".cursor") / "logs" / "code_quality"
     log_dir.mkdir(parents=True, exist_ok=True)
-    
+
     report_path = log_dir / f"quality_report_{timestamp}.txt"
     
-    with open(report_path, 'w') as f:
-        f.write("=== Code Quality Report ===\n")
-        f.write(f"Generated: {datetime.now().isoformat()}\n\n")
-        
-        # Complexity Analysis
-        f.write("=== Complexity Analysis ===\n")
-        f.write(analyze_complexity_trends(complexity))
-        f.write("\n\n")
-        
-        # Code Duplication
-        f.write("=== Code Duplication ===\n")
-        f.write(duplication)
-        f.write("\n\n")
-        
-        # Test Coverage
-        f.write("=== Test Coverage ===\n")
-        if coverage and "totals" in coverage:
-            f.write(f"Total coverage: {coverage['totals']['percent_covered']}%\n")
-            f.write("\nPer-file coverage:\n")
-            for file_path, data in coverage.get("files", {}).items():
-                f.write(f"{file_path}: {data['summary']['percent_covered']}%\n")
-        f.write("\n")
-        
-        # Documentation Coverage
-        f.write("=== Documentation Coverage ===\n")
-        f.write(documentation)
-        f.write("\n\n")
-        
-        # Style Compliance
-        f.write("=== Style Compliance ===\n")
-        f.write(style)
+    report_content = [
+        "Code Quality Report",
+        "=================",
+        f"\nTimestamp: {timestamp}\n",
+        "\nComplexity Analysis:",
+        "-------------------"
+    ]
     
-    logger.info(f"Report generated: {report_path}")
+    # Add complexity details
+    for file_path, funcs in complexity.get("complexity", {}).items():
+        report_content.append(f"\nFile: {file_path}")
+        for func in funcs:
+            report_content.append(f"- {func['name']} (complexity: {func['complexity']})")
+    
+    # Add maintainability
+    report_content.extend([
+        "\nMaintainability Index:",
+        "--------------------"
+    ])
+    for file_path, index in complexity.get("maintainability", {}).items():
+        report_content.append(f"\nFile: {file_path} - Index: {index:.1f}")
+    
+    # Add duplication info
+    report_content.extend([
+        "\nCode Duplication:",
+        "----------------",
+        f"\n{duplication}"
+    ])
+    
+    # Add coverage info
+    report_content.extend([
+        "\nCode Coverage:",
+        "--------------",
+        f"\nTotal coverage: {coverage['totals']['percent_covered']}%"
+    ])
+    
+    # Add documentation coverage
+    report_content.extend([
+        "\nDocumentation:",
+        "--------------",
+        f"\n{documentation}"
+    ])
+    
+    # Add style issues
+    report_content.extend([
+        "\nStyle Check:",
+        "------------",
+        f"\n{style}"
+    ])
+    
+    with open(report_path, 'w') as f:
+        f.write('\n'.join(report_content))
+    
     return report_path
 
 def main():

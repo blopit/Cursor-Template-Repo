@@ -11,6 +11,7 @@ from scripts.weekly.code_quality_check import (
     analyze_complexity_trends,
     generate_report
 )
+from pathlib import Path
 
 @pytest.fixture
 def mock_subprocess():
@@ -137,7 +138,7 @@ def test_analyze_complexity_trends(sample_complexity_data):
     assert "Low Maintainability Files:" in analysis
     assert "MI: 60.5" in analysis
 
-def test_generate_report(tmp_path):
+def test_generate_report(tmp_path, monkeypatch):
     # Arrange
     complexity_data = {
         "complexity": {
@@ -155,21 +156,32 @@ def test_generate_report(tmp_path):
     documentation = "Documentation coverage: 75%"
     style = "Style issues found"
     
-    log_dir = tmp_path / ".cursor" / "logs" / "code_quality"
+    # Set up temporary directory as the root
+    monkeypatch.chdir(tmp_path)
+    log_dir = Path(".cursor") / "logs" / "code_quality"
     log_dir.mkdir(parents=True)
     
-    with patch('pathlib.Path.mkdir') as mock_mkdir:
-        # Act
-        generate_report(
-            complexity_data,
-            duplication,
-            coverage,
-            documentation,
-            style
-        )
-        
-        # Assert
-        mock_mkdir.assert_called_with(parents=True, exist_ok=True)
+    # Act
+    report_path = generate_report(
+        complexity_data,
+        duplication,
+        coverage,
+        documentation,
+        style
+    )
+    
+    # Assert
+    assert report_path.exists()
+    assert report_path.is_file()
+    
+    content = report_path.read_text()
+    assert "Code Quality Report" in content
+    assert "Complexity Analysis" in content
+    assert "func (complexity: 12)" in content
+    assert "Similar lines found" in content
+    assert "Total coverage: 85.5%" in content
+    assert "Documentation coverage: 75%" in content
+    assert "Style issues found" in content
 
 @pytest.mark.integration
 def test_full_code_quality_workflow(tmp_path):
