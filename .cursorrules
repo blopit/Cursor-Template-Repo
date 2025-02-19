@@ -140,7 +140,56 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
 
 ## User Specified Lessons
 
-- You have a python venv in ./venv. Use it.
+- Virtual environment management:
+  - Project uses `.venv` directory for Python virtual environment
+  - To prevent double activation issues:
+    1. Check current environment: `echo $VIRTUAL_ENV`
+    2. If activated, run `deactivate` until back to base shell
+    3. Activate correctly: `source .venv/bin/activate`
+  - Add this protective function to shell config:
+    ```bash
+    venv() {
+        # First, check if we're already in a virtual environment
+        if [ -n "$VIRTUAL_ENV" ]; then
+            echo "Warning: Virtual environment already active at: $VIRTUAL_ENV"
+            echo "To switch environments:"
+            echo "1. Run 'deactivate' until back to base shell"
+            echo "2. Then run this command again"
+            return 1
+        fi
+        
+        # Look for virtual environment directory
+        if [ -d ".venv" ]; then
+            source .venv/bin/activate
+        elif [ -d "venv" ]; then
+            source venv/bin/activate
+        else
+            echo "No virtual environment found in current directory"
+            echo "Expected either '.venv' or 'venv' directory"
+            return 1
+        fi
+        
+        # Verify activation
+        if [ -n "$VIRTUAL_ENV" ]; then
+            echo "Successfully activated virtual environment at: $VIRTUAL_ENV"
+        else
+            echo "Failed to activate virtual environment"
+            return 1
+        fi
+    }
+    
+    # Optional: Add protection to cd command
+    cd() {
+        builtin cd "$@"
+        
+        # If we changed directory and there's an active venv that's not in current path
+        if [ -n "$VIRTUAL_ENV" ] && [[ $PWD != $(dirname "$VIRTUAL_ENV")* ]]; then
+            echo "Warning: You've left the directory of the active virtual environment"
+            echo "Current venv: $VIRTUAL_ENV"
+            echo "Consider running 'deactivate' if you're done with this environment"
+        fi
+    }
+    ```
 - Include info useful for debugging in the program output.
 - Read the file before you try to edit it.
 - Due to Cursor's limit, when you use `git` and `gh` and need to submit a multiline commit message, first write the message in a file, and then use `git commit -F <filename>` or similar command to commit. And then remove the file. Include "[Cursor] " in the commit message and PR title.
