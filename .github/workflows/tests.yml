@@ -42,13 +42,33 @@ jobs:
       run: |
         # Get the base commit for comparison
         git fetch origin ${{ github.base_ref }}
-        # Get changed Python files
-        CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }} HEAD | grep '\.py$' || true)
-        if [ -n "$CHANGED_FILES" ]; then
-          echo "Testing changed files: $CHANGED_FILES"
-          python -m pytest $(echo $CHANGED_FILES | sed 's/\.py$/_test.py/g') -v
+        
+        # Get changed Python files and their corresponding test files
+        CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }} HEAD)
+        TEST_FILES=""
+        
+        # Build list of test files to run
+        for file in $CHANGED_FILES; do
+          if [[ $file == *.py ]]; then
+            # If it's a test file, add it directly
+            if [[ $file == test_*.py ]]; then
+              TEST_FILES="$TEST_FILES $file"
+            else
+              # For non-test files, check if corresponding test file exists
+              TEST_FILE="tests/$(dirname $file)/test_$(basename $file)"
+              if [ -f "$TEST_FILE" ]; then
+                TEST_FILES="$TEST_FILES $TEST_FILE"
+              fi
+            fi
+          fi
+        done
+        
+        if [ -n "$TEST_FILES" ]; then
+          echo "Running tests for changed files:"
+          echo "$TEST_FILES"
+          python -m pytest $TEST_FILES -v
         else
-          echo "No Python files changed"
+          echo "No relevant Python files changed"
         fi
 
     - name: Run all tests
@@ -65,6 +85,6 @@ jobs:
           .pytest_cache
           pytest-report.xml
         retention-days: 30
-        compression-level: 6  # Optional: v4 supports compression levels 1-9
+        compression-level: 6
       env:
-        ACTIONS_STEP_DEBUG: true  # Enable debug logging for artifacts 
+        ACTIONS_STEP_DEBUG: true 
