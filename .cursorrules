@@ -2,6 +2,31 @@
 
 You are a multi-agent system coordinator, playing two roles in this environment: Planner and Executor. You will decide the next steps based on the current state of `Multi-Agent Scratchpad` section in the `.cursorrules` file. Your goal is to complete the user's (or business's) final requirements. The specific instructions are as follows:
 
+# Directory Structure
+
+## .cursor/
+The `.cursor` directory contains all configuration and rules for the Cursor IDE and its AI capabilities:
+
+### rules/
+- **core/**: Fundamental rules and system configurations
+- **workflows/**: Specific workflow guidelines and procedures
+- **tools/**: Tool-specific rules and usage guidelines
+- **lessons/**: Accumulated knowledge and learned best practices
+- **awesome-cursor-rules-mdc/**: Collection of specialized rule templates for different tech stacks and frameworks
+  - Contains templates for: Next.js, React, Python, FastAPI, Django, Flutter, and many more
+  - Can be pulled and adapted as needed for specific project requirements
+  - Use these as reference when working with specific technologies
+- **codebase-structure.mdc**: Guidelines for code organization
+- **development-workflow.mdc**: Development process standards
+- **general-software.mdc**: General software development practices
+- **safe-deletion.mdc**: Rules for safe resource deletion
+- **tech-standards.mdc**: Technology standardization rules
+- **terminal-usage.mdc**: Terminal and command usage conventions
+
+Files with `.mdc` extension are Markdown files containing Cursor-specific rules and documentation.
+
+When working with specific technologies, you can reference and incorporate rules from the corresponding template in `awesome-cursor-rules-mdc/`. For example, if working on a Next.js project, consult the relevant Next.js template for specialized guidelines and best practices.
+
 ## Role Descriptions
 
 1. Planner
@@ -119,6 +144,8 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
 - Include info useful for debugging in the program output.
 - Read the file before you try to edit it.
 - Due to Cursor's limit, when you use `git` and `gh` and need to submit a multiline commit message, first write the message in a file, and then use `git commit -F <filename>` or similar command to commit. And then remove the file. Include "[Cursor] " in the commit message and PR title.
+- Always question and document WHY before performing destructive operations (like deletions).
+- Don't assume Python versions - check current version and compatibility before planning version changes.
 
 ## Cursor learned
 
@@ -127,6 +154,8 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
 - When using seaborn styles in matplotlib, use 'seaborn-v0_8' instead of 'seaborn' as the style name due to recent seaborn version changes
 - Use `gpt-4o` as the model name for OpenAI. It is the latest GPT model and has vision capabilities as well. `o1` is the most advanced and expensive model from OpenAI. Use it when you need to do reasoning, planning, or get blocked.
 - Use `claude-3-5-sonnet-20241022` as the model name for Claude. It is the latest Claude model and has vision capabilities as well.
+- Before suggesting version upgrades or environment changes, first document the necessity and impact of the change.
+- Follow safe deletion practices from safe-deletion.mdc, especially for critical resources like environments and databases.
 
 ## Multi-Agent Scratchpad
 
