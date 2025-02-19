@@ -167,5 +167,26 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+# Token usage logs
+token_logs/
+*.json.token
+session_*.json
+
 # PyPI configuration file
 .pypirc
+
+# Cursor AI Assistant
+.cursor/temp/*
+.cursor/cache/*
+.cursor/logs/*
+.cursor/sessions/*
+.cursor/workspace/*
+!.cursor/temp/.gitkeep
+!.cursor/cache/.gitkeep
+!.cursor/logs/.gitkeep
+!.cursor/sessions/.gitkeep
+!.cursor/workspace/.gitkeep
+!.cursor/rules/
+!.cursor/snippets/
+!.cursor/metrics/
+!.cursor/README.md
