@@ -1,0 +1,64 @@
+---
+description: 
+globs: 
+---
+# Git Automation Rules
+
+## Commit Guidelines
+
+### Message Format
+- Prefix: [Cursor]
+- Type: feat|fix|docs|style|refactor|test|chore
+- Scope: (optional) component affected
+- Description: clear, concise change description
+
+### Multiline Messages
+- Write message to temporary file
+- Use git commit -F <filename>
+- Remove temporary file after commit
+- Include detailed body if needed
+
+## Pull Request Process
+
+### PR Creation
+- Descriptive title with [Cursor] prefix
+- Clear description of changes
+- Reference related issues
+- Include test results
+
+### Review Process
+- Automated tests must pass
+- Code review required
+- Address feedback promptly
+- Update documentation
+
+<rule>
+name: git_automation
+description: Rules for git workflow automation
+filters:
+  - type: event
+    pattern: "git_commit|pr_create"
+  - type: content
+    pattern: "git.*commit|pull.*request"
+
+actions:
+  - type: enforce
+    conditions:
+      - pattern: "\\[Cursor\\].*:"
+        message: "Commit message must start with [Cursor]"
+      - pattern: "^(feat|fix|docs|style|refactor|test|chore)"
+        message: "Use conventional commit types"
+
+  - type: suggest
+    message: |
+      For git operations:
+      1. Use [Cursor] prefix
+      2. Follow conventional commits
+      3. Write clear messages
+      4. Reference issues
+      5. Update documentation
+
+metadata:
+  priority: high
+  version: 1.0
+</rule> 

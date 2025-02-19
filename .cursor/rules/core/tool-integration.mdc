@@ -1,0 +1,76 @@
+---
+description: When integrating external tools and APIs
+globs: *.py
+---
+# Tool Integration Rules
+
+## Available Tools
+
+### 1. LLM API
+- OpenAI GPT-4 for general tasks
+- OpenAI o1 for complex reasoning
+- Vision capabilities for image analysis
+- Environment: OPENAI_API_KEY required
+
+### 2. Web Scraper
+- Concurrent URL processing
+- JavaScript rendering support
+- Content extraction and cleaning
+- Rate limiting and error handling
+
+### 3. Search Engine
+- Web search functionality
+- Structured result format
+- Integration with web scraper
+- Result filtering and ranking
+
+### 4. Screenshot Utils
+- Webpage capture
+- Custom dimensions
+- LLM verification
+- Visual regression testing
+
+## Usage Guidelines
+
+### Tool Selection
+- Use appropriate tool for task
+- Chain tools when needed
+- Handle errors gracefully
+- Document tool usage
+
+### Environment Setup
+- Use Python virtual environment
+- Manage API keys securely
+- Configure rate limits
+- Monitor usage and costs
+
+<rule>
+name: tool_integration
+description: Rules for tool usage and integration
+filters:
+  - type: event
+    pattern: "tool_invocation"
+  - type: content
+    pattern: "import.*tools\\."
+
+actions:
+  - type: enforce
+    conditions:
+      - pattern: "api_key_check"
+        message: "Verify API keys before tool use"
+      - pattern: "error_handling"
+        message: "Implement proper error handling"
+
+  - type: suggest
+    message: |
+      When using tools:
+      1. Check environment setup
+      2. Handle rate limits
+      3. Process errors gracefully
+      4. Document usage patterns
+      5. Monitor performance
+
+metadata:
+  priority: high
+  version: 1.0
+</rule> 
