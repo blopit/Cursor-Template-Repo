@@ -1,0 +1,187 @@
+# Development Stages Rule Organization
+
+## Directory Structure
+
+```
+stages/
+├── 1-analysis/
+│   ├── requirements-gathering.mdc
+│   ├── system-design.mdc
+│   ├── architecture-planning.mdc
+│   └── feasibility-assessment.mdc
+├── 2-planning/
+│   ├── project-setup.mdc
+│   ├── resource-allocation.mdc
+│   ├── timeline-planning.mdc
+│   └── risk-assessment.mdc
+├── 3-implementation/
+│   ├── coding-standards/
+│   │   ├── language-specific/
+│   │   ├── formatting.mdc
+│   │   └── naming-conventions.mdc
+│   ├── documentation/
+│   ├── logging/
+│   └── error-handling/
+├── 4-testing/
+│   ├── unit-testing.mdc
+│   ├── integration-testing.mdc
+│   ├── performance-testing.mdc
+│   └── security-testing.mdc
+├── 5-deployment/
+│   ├── ci-cd.mdc
+│   ├── environment-setup.mdc
+│   ├── rollout-strategies.mdc
+│   └── monitoring-setup.mdc
+├── 6-maintenance/
+│   ├── monitoring/
+│   ├── logging/
+│   ├── debugging/
+│   └── optimization/
+└── 7-evolution/
+    ├── feedback-collection/
+    ├── improvement-tracking/
+    └── version-planning/
+```
+
+## Stage Descriptions
+
+### 1. Analysis Stage
+- Requirements gathering and validation
+- System architecture design
+- Technical feasibility assessment
+- Stakeholder communication
+- Resource estimation
+
+### 2. Planning Stage
+- Project structure setup
+- Timeline and milestone definition
+- Resource allocation
+- Risk assessment and mitigation
+- Tool selection and setup
+
+### 3. Implementation Stage
+- Coding standards and practices
+- Documentation requirements
+- Error handling strategies
+- Logging implementation
+- Testing approach
+- Security considerations
+
+### 4. Testing Stage
+- Unit testing requirements
+- Integration testing procedures
+- Performance testing standards
+- Security testing protocols
+- User acceptance testing
+- Test automation guidelines
+
+### 5. Deployment Stage
+- CI/CD pipeline setup
+- Environment configuration
+- Release management
+- Rollback procedures
+- Monitoring setup
+
+### 6. Maintenance Stage
+- System monitoring
+- Performance optimization
+- Bug fixing procedures
+- Security updates
+- Documentation updates
+
+### 7. Evolution Stage
+- Feature request handling
+- Version planning
+- Deprecation policies
+- Migration strategies
+- Feedback integration
+
+## Integration Points
+
+### Cross-Stage Concerns
+1. **Logging and Monitoring**
+   - Spans across implementation, testing, deployment, and maintenance
+   - Unified approach needed
+   - Stage-specific requirements
+
+2. **Documentation**
+   - Required at every stage
+   - Different focus per stage
+   - Maintains continuity
+
+3. **Security**
+   - Integral to all stages
+   - Stage-specific considerations
+   - Continuous validation
+
+### Workflow Integration
+1. **Stage Transitions**
+   - Clear entry/exit criteria
+   - Handover procedures
+   - Quality gates
+
+2. **Feedback Loops**
+   - Inter-stage communication
+   - Continuous improvement
+   - Learning integration
+
+3. **Metrics Collection**
+   - Stage-specific KPIs
+   - Progress tracking
+   - Quality measurements
+
+## Usage Guidelines
+
+### 1. Stage Navigation
+- Start with the appropriate stage directory
+- Follow cross-references when needed
+- Consider dependencies between stages
+
+### 2. Rule Application
+- Apply stage-specific rules first
+- Consider cross-cutting concerns
+- Follow integration guidelines
+
+### 3. Maintenance
+- Regular review of stage-specific rules
+- Update based on feedback
+- Archive obsolete rules
+- Add new learnings
+
+## Success Metrics
+
+### Per Stage
+1. **Analysis**
+   - Requirements clarity
+   - Design completeness
+   - Stakeholder approval
+
+2. **Planning**
+   - Timeline accuracy
+   - Resource utilization
+   - Risk mitigation effectiveness
+
+3. **Implementation**
+   - Code quality metrics
+   - Documentation coverage
+   - Test coverage
+
+4. **Testing**
+   - Bug detection rate
+   - Test automation coverage
+   - Performance benchmarks
+
+5. **Deployment**
+   - Deployment success rate
+   - Rollback effectiveness
+   - Environment stability
+
+6. **Maintenance**
+   - System uptime
+   - Issue resolution time
+   - Performance metrics
+
+7. **Evolution**
+   - Feature adoption rate
+   - User satisfaction
+   - Technical debt management 
