@@ -52,12 +52,13 @@ jobs:
         
     - name: Upload test results
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: test-results
         path: |
           .pytest_cache
           pytest-report.xml
         retention-days: 30
+        compression-level: 6  # Optional: v4 supports compression levels 1-9
       env:
         ACTIONS_STEP_DEBUG: true  # Enable debug logging for artifacts 
