@@ -1,0 +1,31 @@
+# Ignore everything in these directories
+temp/*
+cache/*
+logs/*
+sessions/*
+workspace/*
+
+# Don't ignore these directories themselves
+!temp/.gitkeep
+!cache/.gitkeep
+!logs/.gitkeep
+!sessions/.gitkeep
+!workspace/.gitkeep
+
+# Track specific directories and files
+!rules/
+!snippets/
+!metrics/
+!README.md
+
+# Ignore system files
+.DS_Store
+*.log
+*.cache
+*.tmp
+
+# Ignore sensitive information
+*.env
+*_key*
+*_token*
+*_secret*
