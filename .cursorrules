@@ -211,3 +211,17 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
 - **Commit Guidelines:** Use commit messages prefixed with "[Cursor]" when making multi-line commit messages (utilize a temporary file for commits if needed).
 - **Tool Usage:** Ensure all scripts are run within the Python virtual environment located at `./venv`.
 - **Read Before Edit:** Always read the current state of this file before making any changes to avoid overwriting important context.
+
+# Cursor Rules Configuration
+
+<available_instructions>
+Cursor rules are user provided instructions for the AI to follow to help work with the codebase.
+They may or may not be relevent to the task at hand. If they are, use the fetch_rules tool to fetch the full rule.
+Some rules may be automatically attached to the conversation if the user attaches a file that matches the rule's glob, and wont need to be fetched.
+
+codebase-structure: when coding anything
+general-software: General software development best practices and guidelines
+safe-deletion: Guidelines for safe deletion of resources and data
+terminal-usage: +
+tdd: Test-Driven Development guidelines and best practices
+</available_instructions>
