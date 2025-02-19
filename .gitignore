@@ -167,5 +167,10 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+# Token usage logs
+token_logs/
+*.json.token
+session_*.json
+
 # PyPI configuration file
 .pypirc
