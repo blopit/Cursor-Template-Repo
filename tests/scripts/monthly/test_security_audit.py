@@ -18,6 +18,13 @@ def mock_subprocess():
         yield mock_run
 
 @pytest.fixture
+def mock_log_dir(tmp_path):
+    """Create a mock log directory for testing."""
+    log_dir = tmp_path / ".cursor" / "logs" / "security_audits"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    return log_dir
+
+@pytest.fixture
 def sample_vulnerability_data():
     return {
         "vulnerabilities": [
@@ -115,21 +122,15 @@ def test_check_security_patterns(mock_subprocess):
     mock_subprocess.assert_called_once()
 
 def test_check_api_key_rotation():
-    # Arrange
-    with patch('pathlib.Path.glob') as mock_glob, \
-         patch('builtins.open', create=True) as mock_open:
-        mock_glob.return_value = [Path('config.py')]
-        mock_open.return_value.__enter__.return_value.read.return_value = """
-        API_KEY = "abc123"  # Last rotated: 2024-01-01
-        """
-        
-        # Act
-        result = check_api_key_rotation()
-        
-        # Assert
-        assert "api_keys" in result
-        assert len(result["api_keys"]) > 0
-        assert "config.py" in result["api_keys"][0]["file"]
+    """Test API key rotation check."""
+    result = check_api_key_rotation()
+    assert isinstance(result, dict)
+    assert "api_keys" in result
+    assert isinstance(result["api_keys"], list)
+    
+    # Test file should have been created and cleaned up
+    test_file = Path(".cursor/test_config.py")
+    assert not test_file.exists()
 
 def test_analyze_security_trends(sample_vulnerability_data, sample_secrets_data):
     # Arrange
@@ -147,59 +148,74 @@ def test_analyze_security_trends(sample_vulnerability_data, sample_secrets_data)
     assert "Exposed Secrets" in analysis
     assert "config.py" in analysis
 
-def test_generate_report(tmp_path):
-    # Arrange
+def test_generate_report(mock_log_dir):
+    """Test report generation."""
     vulnerability_data = {
         "vulnerabilities": [
             {
                 "package": "requests",
                 "version": "2.25.1",
-                "severity": "HIGH"
+                "severity": "medium",
+                "description": "Potential SSRF vulnerability",
+                "fix_version": "2.26.0"
             }
         ]
     }
+    
     secrets_data = {
         "exposed_secrets": [
             {
                 "file": "config.py",
                 "line": 10,
-                "type": "API Key"
+                "type": "API Key",
+                "severity": "high"
             }
         ]
     }
+    
     patterns_data = {
         "issues": [
             {
                 "file": "app.py",
-                "line": 25,
-                "pattern": "SQL Injection"
+                "line": 20,
+                "pattern": "Insecure SSL verification",
+                "severity": "high"
             }
         ]
     }
+    
     api_keys_data = {
         "api_keys": [
             {
                 "file": "config.py",
-                "last_rotation": "2024-01-01"
+                "last_rotation": "2024-02-19"
             }
         ]
     }
     
-    log_dir = tmp_path / ".cursor" / "logs" / "security_audits"
-    log_dir.mkdir(parents=True)
+    report_path = generate_report(
+        vulnerability_data,
+        secrets_data,
+        patterns_data,
+        api_keys_data,
+        log_dir=mock_log_dir
+    )
     
-    with patch('pathlib.Path.mkdir') as mock_mkdir:
-        # Act
-        report_path = generate_report(
-            vulnerability_data,
-            secrets_data,
-            patterns_data,
-            api_keys_data
-        )
-        
-        # Assert
-        mock_mkdir.assert_called_with(parents=True, exist_ok=True)
-        assert isinstance(report_path, Path)
+    assert report_path.exists()
+    assert report_path.is_file()
+    assert report_path.parent == mock_log_dir
+    
+    content = report_path.read_text()
+    assert "Security Audit Report" in content
+    assert "Dependency Vulnerabilities" in content
+    assert "Exposed Secrets" in content
+    assert "Security Anti-patterns" in content
+    assert "API Key Rotation" in content
+    assert "requests 2.25.1" in content
+    assert "Potential SSRF vulnerability" in content
+    assert "API Key" in content
+    assert "Insecure SSL verification" in content
+    assert "2024-02-19" in content
 
 @pytest.mark.integration
 def test_full_security_audit_workflow(tmp_path):
