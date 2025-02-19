@@ -268,6 +268,164 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
 - **Retrospective Insights:** Log any mistakes, debugging tips, or configuration changes that can inform future iterations.
 - **Documentation:** Note adjustments to tool usage or integration processes (e.g., specific model names, commit message conventions).
 
+## Database Configuration Rules
+
+### Environment-Specific Database Standards
+- Use standardized database naming: `mcp_{env}` (e.g., mcp_test, mcp_dev, mcp_prod)
+- Follow security progression:
+  - Test: SSL disabled, local connections only
+  - Dev: SSL preferred, local connections
+  - Prod: SSL required, restricted access
+- Connection pools should scale with environment:
+  - Test: max_connections = 10
+  - Dev: max_connections = 20
+  - Prod: max_connections = 100
+- Always use environment variables for sensitive data:
+  - `MCP_TEST_DB_PASSWORD`
+  - `MCP_DEV_DB_PASSWORD`
+  - `MCP_DB_PASSWORD`
+  - `MCP_DB_HOST`
+  - `MCP_DB_USER`
+
+### Database Best Practices
+1. Connection Management:
+   - Always use connection pools
+   - Implement proper cleanup in tests
+   - Use context managers for transactions
+   - Handle SSL contexts appropriately
+
+2. Migration Standards:
+   - Use Alembic for all migrations
+   - Include both upgrade and downgrade paths
+   - Test migrations in isolation
+   - Document breaking changes
+
+3. Testing Guidelines:
+   - Use isolated transactions for tests
+   - Implement proper cleanup
+   - Mock external dependencies
+   - Use fixtures for common setups
+
+4. Data Model Standards:
+   - Inherit from BaseDBModel
+   - Include created_at/updated_at
+   - Use proper type hints
+   - Implement validation
+
+5. Error Handling:
+   - Use specific exception types
+   - Implement proper rollbacks
+   - Log database errors
+   - Include context in error messages
+
+### Temporary Database Management
+
+1. **Test Database Creation**
+```python
+def create_temp_test_db():
+    """Create a temporary test database."""
+    db_name = f"test_db_{int(time.time())}"
+    conn = psycopg2.connect(
+        dbname='postgres',
+        user=os.getenv('MCP_TEST_DB_USER'),
+        password=os.getenv('MCP_TEST_DB_PASSWORD'),
+        host=os.getenv('MCP_TEST_DB_HOST', 'localhost')
+    )
+    conn.autocommit = True
+    cur = conn.cursor()
+    
+    try:
+        cur.execute(f'CREATE DATABASE {db_name}')
+        return db_name
+    finally:
+        cur.close()
+        conn.close()
+```
+
+2. **Test Database Cleanup**
+```python
+def cleanup_temp_db(db_name: str):
+    """Drop a temporary test database."""
+    conn = psycopg2.connect(
+        dbname='postgres',
+        user=os.getenv('MCP_TEST_DB_USER'),
+        password=os.getenv('MCP_TEST_DB_PASSWORD'),
+        host=os.getenv('MCP_TEST_DB_HOST', 'localhost')
+    )
+    conn.autocommit = True
+    cur = conn.cursor()
+    
+    try:
+        # Terminate all connections to the database
+        cur.execute(f"""
+            SELECT pg_terminate_backend(pg_stat_activity.pid)
+            FROM pg_stat_activity
+            WHERE pg_stat_activity.datname = '{db_name}'
+            AND pid <> pg_backend_pid()
+        """)
+        # Drop the database
+        cur.execute(f'DROP DATABASE IF EXISTS {db_name}')
+    finally:
+        cur.close()
+        conn.close()
+```
+
+3. **Pytest Fixtures**
+```python
+@pytest.fixture(scope='function')
+async def test_db():
+    """Fixture that creates a temporary test database."""
+    db_name = create_temp_test_db()
+    
+    # Create connection pool
+    pool = await asyncpg.create_pool(
+        database=db_name,
+        user=os.getenv('MCP_TEST_DB_USER'),
+        password=os.getenv('MCP_TEST_DB_PASSWORD'),
+        host=os.getenv('MCP_TEST_DB_HOST', 'localhost'),
+        min_size=2,
+        max_size=10
+    )
+    
+    try:
+        yield pool
+    finally:
+        await pool.close()
+        cleanup_temp_db(db_name)
+```
+
+4. **Usage Guidelines**
+- Always use unique names for temporary databases
+- Clean up after tests complete
+- Use connection pooling
+- Implement proper error handling
+- Set appropriate timeouts
+- Use transaction isolation
+
+5. **Security Considerations**
+- Use separate test credentials
+- Restrict test database permissions
+- Never use production credentials
+- Clean up failed test databases
+- Monitor test database usage
+
+6. **Best Practices**
+- Use fixtures for database management
+- Implement proper cleanup
+- Handle connection pooling
+- Use transactions for isolation
+- Clean up on test completion
+
+### Common Pitfalls to Avoid
+1. Not cleaning up test databases
+2. Hardcoding credentials
+3. Missing connection pooling
+4. Improper transaction management
+5. Insufficient error handling
+6. Missing database indexes
+7. Not using prepared statements
+8. Forgetting to close connections
+
 ## Additional Instructions
 - **Commit Guidelines:** Use commit messages prefixed with "[Cursor]" when making multi-line commit messages (utilize a temporary file for commits if needed).
 - **Tool Usage:** Ensure all scripts are run within the Python virtual environment located at `./venv`.
@@ -286,3 +444,80 @@ safe-deletion: Guidelines for safe deletion of resources and data
 terminal-usage: +
 tdd: Test-Driven Development guidelines and best practices
 </available_instructions>
+
+## Environment-Specific Standards
+
+### Environment Configuration
+- Use standardized environment names: TEST, DEV, PROD
+- Each environment should have its own configuration file
+- Use environment variables for sensitive data
+- Never share credentials between environments
+
+### Test Environment
+- Disable SSL for easier local testing
+- Enable debug logging
+- Allow mocking of dependencies
+- Limit resource usage
+- Local-only connections
+- Disable rate limiting
+- Use in-memory or temporary storage
+
+### Development Environment
+- SSL preferred but not required
+- Info level logging
+- Limited mocking capabilities
+- Moderate resource limits
+- Restricted network access
+- Basic rate limiting
+- Local persistent storage
+
+### Production Environment
+- SSL required
+- Warning/Error level logging only
+- No mocking allowed
+- High resource limits
+- Strict network policies
+- Aggressive rate limiting
+- Distributed persistent storage
+
+### Environment Variables
+- Use consistent naming: `MCP_{ENV}_{VARIABLE}`
+- Include all required configurations
+- Document default values
+- Validate on startup
+
+### Configuration Validation
+- Validate all required fields
+- Check environment-specific requirements
+- Verify resource limits
+- Test configuration before startup
+
+### Monitoring and Logging
+- Environment-specific log levels
+- Separate log storage per environment
+- Different metric collection rules
+- Custom alert thresholds
+
+### Security Standards
+- Environment-specific access controls
+- Different authentication requirements
+- Varying rate limit thresholds
+- Custom security headers
+
+### Best Practices
+1. Never use production data in other environments
+2. Keep configurations as similar as possible
+3. Document all environment differences
+4. Use automated environment setup
+5. Regular security audits per environment
+6. Maintain separate backup strategies
+7. Different scaling rules per environment
+
+### Common Pitfalls
+1. Mixing environment configurations
+2. Using production credentials in development
+3. Insufficient logging in production
+4. Missing environment validation
+5. Inconsistent security standards
+6. Poor resource management
+7. Inadequate monitoring
