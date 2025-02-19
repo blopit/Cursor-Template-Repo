@@ -1,0 +1,9 @@
+[Cursor] Update actions/upload-artifact to v4
+
+- Update actions/upload-artifact from v3 to v4 to address deprecation
+- Add compression-level configuration for improved performance
+- Maintain existing artifact configuration and debug logging
+
+This update addresses the deprecation notice for v3 of the artifact actions,
+which will be deprecated on January 30th, 2025. The v4 version provides up to
+98% faster upload speeds and improved features. 
