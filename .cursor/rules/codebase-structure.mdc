@@ -36,8 +36,6 @@ globs: *.py
 
 ### Required Environment Variables
 - `OPENAI_API_KEY`: For LLM API access
-- `DATABASE_URL`: PostgreSQL connection string
-- `REDIS_URL`: Redis connection string
 - Additional keys defined in `.env.example`
 
 ## Core Directories
@@ -57,8 +55,6 @@ globs: *.py
 - `requirements.txt`: Python package dependencies
 - `.env`: Environment variables (gitignored)
 - `.env.example`: Example environment variables template
-- `setup.sh`: Setup script for the project
-- `tsconfig.json`: TypeScript configuration
 
 ## Documentation
 
@@ -90,7 +86,7 @@ When looking for specific functionality:
 ## Version Requirements
 
 All version requirements are specified in `requirements.txt`. Key version constraints:
-- Python >= 3.9
+- Python >= 3.11
 - FastAPI >= 0.104.0
 - SQLAlchemy >= 2.0.23
 - Pydantic >= 2.4.2
