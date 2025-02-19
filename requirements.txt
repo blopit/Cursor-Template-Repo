@@ -1,6 +1,7 @@
 # Core Dependencies
 python-dotenv>=1.0.1
 pydantic>=2.10.6
+pytz>=2024.1  # Added for timezone support
 
 # Web and HTTP
 aiohttp>=3.9.3
