@@ -1,0 +1,120 @@
+---
+description: when coding anything
+globs: *.py
+---
+# HotelServiceCRM Codebase Structure
+
+## Technology Stack
+
+### Core Technologies
+- **Backend Framework**: FastAPI (>= 0.104.0)
+- **Database**: PostgreSQL with asyncpg (>= 0.29.0)
+- **ORM**: SQLAlchemy (>= 2.0.23)
+- **Migration Tool**: Alembic (>= 1.12.1)
+- **API Documentation**: OpenAPI/Swagger (built into FastAPI)
+
+### AI/ML Integration
+- **LLM Provider**: OpenAI
+  - Models: o1 (planning), gpt-4o (general tasks)
+  - Usage: Agent system, code planning
+- **Token Management**: Custom token tracking system
+- **Web Scraping**: Playwright/aiohttp for hotel data
+
+### Development Tools
+- **Testing**: pytest (>= 7.4.3) with pytest-asyncio
+- **HTTP Client**: httpx (>= 0.25.1)
+- **Environment Management**: python-dotenv (>= 1.0.0)
+- **Caching**: Redis (>= 5.0.1)
+- **Type Checking**: Pydantic (>= 2.4.2)
+- **Settings Management**: pydantic-settings (>= 2.0.3)
+
+### Development Workflow
+- **Version Control**: Git
+- **Chunk Development**: Custom tooling (tools/chunk_dev.py)
+- **Code Coverage**: pytest-cov
+- **Logging**: Python standard logging
+
+### Required Environment Variables
+- `OPENAI_API_KEY`: For LLM API access
+- `DATABASE_URL`: PostgreSQL connection string
+- `REDIS_URL`: Redis connection string
+- Additional keys defined in `.env.example`
+
+## Core Directories
+
+- `/tools`: Contains utility scripts and tools
+  - `token_tracker.py`: Tracks API token usage and costs
+  - `web_scraper.py`: Handles web scraping for hotel information
+  - `llm_api.py`: Manages LLM API interactions
+  - `chunk_dev.py`: Manages chunked development workflow
+
+- `/tests`: Contains test files
+  - `test_search_engine.py`: Tests for search functionality
+  - `test_token_tracker.py`: Tests for token tracking
+
+## Configuration Files
+
+- `requirements.txt`: Python package dependencies
+- `.env`: Environment variables (gitignored)
+- `.env.example`: Example environment variables template
+- `setup.sh`: Setup script for the project
+- `tsconfig.json`: TypeScript configuration
+
+## Documentation
+
+- `scratchpad.md`: Project notes and lessons learned
+- `README.md`: Project overview and setup instructions
+
+## Important Paths to Remember
+
+1. API Configuration: `.env` file for all API keys and endpoints
+2. Database Settings: `.env` file under `DATABASE_*` variables
+3. Test Files: All tests in `/tests` directory
+4. Utility Scripts: All tools in `/tools` directory
+
+## Code Conventions
+
+1. All API-related code is in `tools/llm_api.py`
+2. Web scraping functionality is in `tools/web_scraper.py`
+3. Token usage tracking is in `tools/token_tracker.py`
+4. Test files follow the pattern `test_*.py`
+
+## Search Paths
+
+When looking for specific functionality:
+1. API integrations → check `tools/llm_api.py`
+2. Web scraping → check `tools/web_scraper.py`
+3. Token tracking → check `tools/token_tracker.py`
+4. Tests → check corresponding test file in `/tests`
+
+## Version Requirements
+
+All version requirements are specified in `requirements.txt`. Key version constraints:
+- Python >= 3.9
+- FastAPI >= 0.104.0
+- SQLAlchemy >= 2.0.23
+- Pydantic >= 2.4.2
+
+## Development Environment Setup
+
+1. Create virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # or venv\Scripts\activate on Windows
+   ```
+
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Configure environment:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your values
+   ```
+
+4. Initialize database:
+   ```bash
+   alembic upgrade head
+   ``` 

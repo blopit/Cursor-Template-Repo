@@ -1,0 +1,107 @@
+---
+description: When cleaning up and organizing project files and artifacts
+globs: *.log,*.png,*.coverage*,.DS_Store
+---
+# Cleanup Rules
+
+## File Organization
+
+### Directory Structure
+- Keep root directory clean
+- Organize files by type and purpose
+- Use appropriate subdirectories
+- Follow consistent naming conventions
+- Maintain clear separation of concerns
+
+### Designated Directories
+- /logs - All log files
+- /screenshots - Error and debug screenshots
+- /coverage - Test coverage reports
+- /artifacts - Build and temporary files
+- /docs - Documentation and diagrams
+
+## Artifact Management
+
+### Log Files
+- Store in /logs directory
+- Use date-based subdirectories
+- Implement log rotation
+- Clean logs older than 30 days
+- Compress historical logs
+
+### Error Screenshots
+- Store in /screenshots directory
+- Use date-based organization
+- Include error context in filename
+- Clean screenshots older than 7 days
+- Archive if needed for documentation
+
+### Test Artifacts
+- Store coverage reports in /coverage
+- Clean temporary test files
+- Remove empty log files
+- Use .gitignore for test artifacts
+- Maintain only latest coverage data
+
+### System Files
+- Ignore .DS_Store files
+- Single virtual environment (prefer venv/)
+- Clean pip cache regularly
+- Remove duplicate environment files
+- Maintain clean git history
+
+## Important Safety Rules
+
+### Never Delete Without Backup
+- Always create backups before cleanup
+- Verify backup integrity
+- Document what was cleaned
+- Keep backup for reasonable time
+- Have restoration process ready
+
+### Protected Files
+- Never auto-delete configuration files
+- Preserve important documentation
+- Keep security-related files
+- Maintain deployment scripts
+- Protect database files
+
+### Cleanup Verification
+- Verify system still works after cleanup
+- Check all tests pass
+- Ensure documentation is updated
+- Validate backup process
+- Test restoration process
+
+<rule>
+name: cleanup_rules
+description: Rules for maintaining a clean and organized codebase
+filters:
+  - type: event
+    pattern: "cleanup|organize"
+  - type: content
+    pattern: "cleanup|organize|remove|delete"
+
+actions:
+  - type: enforce
+    conditions:
+      - pattern: "delete_.*"
+        message: "Create backup before deletion"
+      - pattern: "cleanup_.*"
+        message: "Verify system integrity after cleanup"
+      - pattern: "organize_.*"
+        message: "Follow directory structure guidelines"
+
+  - type: suggest
+    message: |
+      Before cleanup:
+      1. Create backups
+      2. Document changes
+      3. Verify protected files
+      4. Test restoration
+      5. Update documentation
+
+metadata:
+  priority: high
+  version: 1.0
+</rule> 
