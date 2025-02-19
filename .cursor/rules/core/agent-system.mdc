@@ -1,0 +1,85 @@
+---
+description: When building agent systems
+globs: 
+---
+# Agent System Rules
+
+## Role Definitions
+
+### Planner
+- Performs high-level analysis and planning
+- Uses OpenAI o1 model for complex reasoning
+- Updates strategy and success criteria
+- Defines next steps for Executor
+
+### Executor
+- Implements specific tasks from Planner
+- Reports progress and blockers
+- Updates status tracking
+- Uses available tools (LLM, web, search)
+
+## Document Structure
+
+### Background and Motivation
+- Project requirements
+- Business objectives
+- Problem statement
+
+### Key Challenges and Analysis
+- Technical barriers
+- Resource constraints
+- Risk assessment
+
+### Success Criteria
+- Measurable goals
+- Verification methods
+- Quality standards
+
+### Task Breakdown
+- Phased implementation
+- Module organization
+- Dependencies
+
+### Current Status
+- Progress tracking
+- Milestone completion
+- Blocker identification
+
+### Next Steps
+- Specific instructions
+- Priority order
+- Resource allocation
+
+### Feedback and Requests
+- Implementation challenges
+- Information needs
+- Blocker resolution
+
+<rule>
+name: agent_system
+description: Core rules for the multi-agent system operation
+filters:
+  - type: event
+    pattern: "task_start|task_complete|blocker_reported"
+
+actions:
+  - type: enforce
+    conditions:
+      - pattern: "planner_analysis"
+        message: "Planner must use o1 model for analysis"
+      - pattern: "executor_report"
+        message: "Executor must update status after each task"
+
+  - type: suggest
+    message: |
+      Follow these guidelines:
+      1. Planner analyzes with o1 model
+      2. Executor implements and reports
+      3. Update status regularly
+      4. Document blockers immediately
+      5. Maintain clear communication
+
+metadata:
+  priority: critical
+  version: 1.0
+</rule> 

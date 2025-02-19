@@ -1,0 +1,173 @@
+---
+description: When implementing features in small, manageable chunks
+globs: *.py,*.md
+---
+# Chunked Development Workflow
+
+## Development Tools
+
+1. **Chunk Development Tool**
+   - Location: `tools/chunk_dev.py`
+   - Purpose: Automates the chunked development workflow
+   - Usage:
+     ```bash
+     # Start new feature
+     python tools/chunk_dev.py feature-name --start
+     
+     # Start new chunk
+     python tools/chunk_dev.py feature-name --chunk
+     
+     # Complete current chunk
+     python tools/chunk_dev.py feature-name --finish
+     ```
+
+2. **AI Agent Integration**
+   - Planner Agent: Uses o1 model for chunk planning
+   - Executor Agent: Implements chunks and reports progress
+   - Usage:
+     ```bash
+     # Get chunk planning from Planner
+     python tools/chunk_dev.py hotel-search --plan
+     
+     # Report chunk completion to agents
+     python tools/chunk_dev.py hotel-search --report
+     ```
+
+## Development Cycle
+
+1. **Feature Planning**
+   - Break down feature into small, testable chunks
+   - Each chunk should be completable in 1-2 hours
+   - Document chunk requirements in the commit message draft
+   - Use Planner agent for optimal chunk sizing
+
+2. **Development Phase**
+   ```bash
+   # Get feature plan from Planner agent
+   python tools/chunk_dev.py hotel-search --plan
+   
+   # Create feature branch using the tool
+   python tools/chunk_dev.py hotel-search --start
+   
+   # For each chunk:
+   # 1. Start the chunk
+   python tools/chunk_dev.py hotel-search --chunk
+   
+   # 2. Make your changes
+   # 3. Update commit message in .git/CHUNK_X_MSG
+   
+   # 4. Complete the chunk (runs tests and commits)
+   python tools/chunk_dev.py hotel-search --finish
+   
+   # 5. Report progress to agents
+   python tools/chunk_dev.py hotel-search --report
+   ```
+
+3. **Testing Requirements**
+   - Unit tests must be written/updated for each chunk
+   - All tests must pass before commit
+   - Coverage should not decrease
+   - Tests are automatically run by chunk_dev.py
+   - Manual test run if needed: `pytest tests/ -v --cov`
+
+4. **Commit Structure**
+   - Edit the auto-generated commit message in `.git/CHUNK_X_MSG`:
+   ```
+   feat(scope): brief description
+   
+   Changes:
+   - Detailed bullet point 1
+   - Detailed bullet point 2
+   
+   Tests:
+   - Added test for X
+   - Updated test for Y
+   ```
+
+5. **Chunk Size Guidelines**
+   - Maximum 200 lines of code per chunk
+   - Should be independently testable
+   - Should not break existing functionality
+   - Should be easily revertible if needed
+
+6. **Review Points**
+   After each chunk:
+   - [ ] All tests pass (verified by chunk_dev.py)
+   - [ ] Code is documented
+   - [ ] Changes are atomic
+   - [ ] Commit message is clear
+   - [ ] No unrelated changes
+
+## Error Recovery
+
+If a chunk fails:
+1. The tool will automatically stash changes
+2. Review test output
+3. Make fixes
+4. Run tool again: `python tools/chunk_dev.py feature-name --finish`
+5. Tool will handle stash pop if tests pass
+
+## Integration Points
+
+After completing all chunks:
+1. Rebase if needed: `git rebase main`
+2. Run full test suite: `pytest tests/ -v`
+3. Create pull request
+4. Address review comments per chunk if needed
+
+## Tool Configuration
+
+The chunk development tool (`tools/chunk_dev.py`) provides:
+1. Automated branch creation
+2. Chunk tracking and management
+3. Test running and verification
+4. Commit message templating
+5. Stash management for failed chunks
+6. Progress tracking
+7. AI agent integration for planning and reporting
+8. Environment setup verification
+
+## Environment Setup
+
+Before using the tools:
+1. Verify API keys are configured
+2. Check virtual environment is active
+3. Monitor API usage and costs
+4. Configure rate limits if needed
+
+## Error Handling
+
+The tool provides robust error handling:
+1. Automatic stashing of failed changes
+2. Test failure reporting
+3. Environment verification
+4. API error handling
+5. Rate limit management
+
+## Agent Communication
+
+The tool facilitates agent communication:
+1. Planner agent for chunk strategy
+2. Executor agent for implementation
+3. Progress tracking and reporting
+4. Blocker identification
+5. Status updates
+
+## Example Using Tools
+
+```bash
+# Starting new feature
+python tools/chunk_dev.py hotel-search --start
+
+# Chunk 1: Basic search structure
+python tools/chunk_dev.py hotel-search --chunk
+# Edit tools/search_engine.py
+# Edit commit message in .git/CHUNK_1_MSG
+python tools/chunk_dev.py hotel-search --finish
+
+# Chunk 2: Search filtering
+python tools/chunk_dev.py hotel-search --chunk
+# Edit tools/search_engine.py
+# Edit commit message in .git/CHUNK_2_MSG
+python tools/chunk_dev.py hotel-search --finish
+``` 
