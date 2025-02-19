@@ -1,0 +1,196 @@
+---
+description: Guidelines for safe deletion of resources and data
+globs: *.sql,*.sh,*.py
+---
+# Safe Deletion Guidelines
+
+## Critical Resources Protection
+
+### Protected Resources
+- Databases and tables
+- Production data
+- User data
+- Configuration files
+- Virtual environments
+- Credentials and secrets
+- Deployment artifacts
+- Backup files
+
+### Pre-deletion Checklist
+1. Verify current environment (dev/staging/prod)
+2. Check for dependent systems
+3. Create backup if applicable
+4. Document the deletion
+5. Get required approvals
+6. Use safe deletion methods
+7. Verify backup integrity
+
+## Database Operations
+
+### Database Safety
+- NEVER use `DROP DATABASE` without backup
+- NEVER use `DROP TABLE` without backup
+- Always use transactions for destructive operations
+- Keep deletion scripts in version control
+- Test deletions in development first
+
+### Safe Database Changes
+```sql
+-- Example of safe table modification
+BEGIN TRANSACTION;
+  -- Create backup
+  CREATE TABLE table_name_backup AS SELECT * FROM table_name;
+  
+  -- Verify backup
+  SELECT COUNT(*) FROM table_name_backup;
+  
+  -- Perform operation
+  -- ALTER TABLE / DELETE / etc.
+  
+  -- Verify results
+  -- If success: COMMIT
+  -- If failure: ROLLBACK
+COMMIT;
+```
+
+## File System Operations
+
+### Virtual Environments
+- Backup pip requirements before deletion
+- Check for custom configurations
+- Verify no active processes using the environment
+- Use safe deletion commands with confirmation
+
+### Safe Environment Recreation
+```bash
+# Backup requirements
+pip freeze > requirements.backup.txt
+
+# Compare with existing requirements
+diff requirements.txt requirements.backup.txt
+
+# Create new environment only after verification
+python -m venv new_env_name
+
+# Test new environment before removing old
+```
+
+## Code and Configuration
+
+### Source Code
+- Never use `git clean -fdx` without review
+- Always check git status before destructive operations
+- Commit or stash changes before major operations
+- Use `git clean -n` to preview deletions
+
+### Configuration Files
+- Always backup configs before deletion
+- Keep template versions in version control
+- Document configuration changes
+- Verify replacement configs exist
+
+## Safe Deletion Commands
+
+### File Operations
+```bash
+# Instead of rm -rf, use:
+rm -i  # Interactive deletion
+rm -I  # Prompt once for 3+ files
+
+# For directories:
+mv directory directory_old  # Rename first
+ls -la directory_old       # Verify contents
+rm -r directory_old       # Remove after verification
+```
+
+### Database Operations
+```bash
+# Export before dropping
+pg_dump dbname > backup.sql
+
+# Rename instead of drop
+ALTER DATABASE name RENAME TO name_deprecated;
+
+# Archive tables instead of dropping
+ALTER TABLE name RENAME TO name_archived_YYYYMMDD;
+```
+
+## Recovery Procedures
+
+### Backup Verification
+- Test backups regularly
+- Keep multiple backup generations
+- Document restoration procedures
+- Practice recovery scenarios
+
+### Emergency Recovery
+```bash
+# Database restore
+psql dbname < backup.sql
+
+# File recovery
+cp -a backup_dir/* original_dir/
+
+# Environment recreation
+pip install -r requirements.backup.txt
+```
+
+## Best Practices
+
+### General Guidelines
+- Use soft deletes where possible
+- Implement deletion grace periods
+- Keep audit logs of deletions
+- Use role-based access control
+- Implement deletion confirmations
+
+### Documentation Requirements
+- Document what is being deleted
+- Record why deletion is necessary
+- Note any dependencies affected
+- Include rollback procedures
+- List verification steps taken
+
+## Automation Safety
+
+### Scripts and Tools
+- Include dry-run options
+- Implement confirmation prompts
+- Log all operations
+- Handle errors gracefully
+- Provide rollback capabilities
+
+### Example Script Structure
+```bash
+#!/bin/bash
+set -e
+
+# Confirmation function
+confirm() {
+    read -r -p "${1:-Are you sure? [y/N]} " response
+    case "$response" in
+        [yY][eE][sS]|[yY]) 
+            true
+            ;;
+        *)
+            false
+            ;;
+    esac
+}
+
+# Backup function
+backup() {
+    timestamp=$(date +%Y%m%d_%H%M%S)
+    cp -a "$1" "${1}_backup_${timestamp}"
+}
+
+# Main operation
+if confirm "This will delete X. Are you sure? [y/N]"; then
+    backup "resource_to_delete"
+    # Perform deletion
+    echo "Operation completed"
+else
+    echo "Operation cancelled"
+    exit 1
+fi
+``` 
