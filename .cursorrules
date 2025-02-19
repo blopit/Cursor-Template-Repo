@@ -156,6 +156,18 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
 - Use `claude-3-5-sonnet-20241022` as the model name for Claude. It is the latest Claude model and has vision capabilities as well.
 - Before suggesting version upgrades or environment changes, first document the necessity and impact of the change.
 - Follow safe deletion practices from safe-deletion.mdc, especially for critical resources like environments and databases.
+- When encountering double virtual environment activation (e.g., double `.venv` in prompt), use `deactivate` command repeatedly until back to base shell, then activate once properly with `source .venv/bin/activate`
+- Consider adding a protective `venv()` function to shell config to prevent accidental double activation:
+  ```bash
+  venv() {
+      if [ -n "$VIRTUAL_ENV" ]; then
+          echo "Virtual environment already active: $VIRTUAL_ENV"
+          echo "Run 'deactivate' first if you want to switch environments"
+      else
+          source .venv/bin/activate
+      fi
+  }
+  ```
 
 ## Multi-Agent Scratchpad
 
