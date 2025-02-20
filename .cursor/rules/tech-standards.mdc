@@ -1,1 +1,28 @@
- 
+---
+description: Technology standards, coding style, and architectural best practices for ensuring maintainability and scalability of the project.
+globs: *.*
+---
+
+# Technology Standards Guidelines
+
+## Overview
+This document outlines the technology standards adopted by the project. It covers coding style, architectural best practices, and quality assurance measures that ensure long-term maintainability and scalability.
+
+## Coding Standards
+- Adhere to language-specific style guides.
+- Enforce code formatting using linters and auto-format tools.
+- Write clear and self-documenting code with inline comments where necessary.
+
+## Architectural Guidelines
+- Use modular design and separation of concerns.
+- Prefer dependency injection and configuration-based setups.
+- Ensure scalability, maintainability, and testability of the architecture.
+
+## Tooling and Automation
+- Integrate continuous integration pipelines and automated testing.
+- Maintain consistent configuration across development, testing, and production environments.
+- Use version control with meaningful commit messages following the "[Cursor]" convention.
+
+## Additional Considerations
+- Stay updated with industry best practices.
+- Periodically review and update the standards based on feedback and technological advances. 

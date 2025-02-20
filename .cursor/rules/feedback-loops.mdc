@@ -1,1 +1,24 @@
- 
+---
+description: Guidelines for implementing effective feedback loops in the development workflow, ensuring continuous improvement through regular communication between Planner and Executor.
+globs: **/*
+---
+
+# Feedback Loops Guidelines
+
+## Overview
+This document outlines the importance and implementation of effective feedback loops in the Cursor development workflow. It ensures that both the Planner and Executor regularly share updates to improve processes and performance.
+
+## Key Components
+- **Regular Reviews:** Schedule frequent check-ins and code reviews between team members.
+- **Automated Testing:** Integrate testing feedback into the development cycle.
+- **Iterative Improvement:** Use the feedback to continuously refine and enhance processes.
+
+## Implementation Guidelines
+- Document feedback in a shared location for transparency.
+- Use automated pipelines to collect and review feedback on code quality and performance.
+- Regularly update documentation to reflect changes based on feedback.
+
+## Best Practices
+- Encourage open communication between all team members.
+- Prioritize actionable feedback and address recurring issues promptly.
+- Ensure that feedback is integrated into future planning and development cycles. 

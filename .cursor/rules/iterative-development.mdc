@@ -1,0 +1,110 @@
+---
+description: 
+globs: 
+---
+# Iterative Development Guidelines
+
+## Purpose
+This document outlines the best practices and strategies for iterative development within the Cursor framework. It details the steps, feedback loops, and improvement cycles to ensure continuous delivery and learning.
+
+## Guidelines
+- Embrace small, incremental changes.
+- Regularly review progress and incorporate feedback.
+- Maintain clear communication between Planner and Executor.
+- Update documentation and version control consistently.
+
+## Best Practices
+- Break tasks into manageable subtasks.
+- Establish clear milestones and success criteria.
+- Prioritize testing and feedback integration in each iteration.
+
+## Additional Considerations
+- Adapt the process based on team feedback.
+- Leverage automated tools for continuous integration and deployment.
+
+## Core Principles
+
+### 1. Structured Project Documentation
+- Maintain a `Project_milestones.md` file referenced in `.cursorrules`
+- Document key decisions and rationale
+- Keep track of progress and iterations
+
+### 2. Task Management
+- Break down tasks into well-defined, manageable pieces
+- Focus on core features for MVP before expanding functionality
+- Use incremental development rather than large feature drops
+
+### 3. Test-First Development
+- Write 1-2 integration tests before implementing features
+- Implement tests before writing actual code, even with AI assistance
+- Use TDD as a framework for AI-assisted development
+
+### 4. AI Interaction Guidelines
+- Treat AI tools as assistants, not replacements
+- Always review and validate AI-generated suggestions
+- Maintain critical thinking while using AI tools
+- Request overview before code generation
+- Structure prompts to encourage reasoning about code
+
+### 5. Code Quality and Safety
+- Use Git version control for AI-assisted development
+- Implement real-time schema validation
+- Include liberal use of debug statements
+- Verify AI-generated code for correctness, efficiency, and security
+
+## Tool Usage Optimization
+
+### 1. Composer vs Chat
+- Use Composer (command i) for multi-file operations
+- Leverage Chat for rapid codebase understanding and quick questions
+- Focus on specific tool features that provide the most value
+
+### 2. Model Selection
+- Choose AI models based on specific project requirements
+- Consider using officially integrated and community-developed MCP servers
+- Evaluate multiple AI coding assistants for best workflow fit
+
+### 3. Interactive Development
+- Enable interactive questioning when instructions are unclear
+- Implement desktop notifications for long-running tasks
+- Maintain clear distinction between similar features
+
+## Best Practices for Specific Tasks
+
+### 1. Database Integration
+- Integrate database servers with MCP for context awareness
+- Include Row Level Security policies in schema information
+- Implement proper connection pooling and cleanup
+
+### 2. Documentation
+- Keep organized documentation in markdown files
+- Use Mermaid for visual documentation
+- Regular diagram updates with code changes
+
+### 3. Component Design
+- Break functionality into self-contained, reusable components
+- Implement modular component design
+- Maintain clear feature differentiation
+
+## Common Pitfalls to Avoid
+
+1. Blindly accepting AI-generated code without review
+2. Attempting to use all available features instead of focusing on value
+3. Skipping documentation of key decisions and rationale
+4. Not breaking down tasks into manageable pieces
+5. Ignoring test-first development principles
+6. Missing proper version control integration
+
+## Monitoring and Improvement
+
+1. Track and monitor tool usage to understand value and impact
+2. Regular review of development workflow efficiency
+3. Continuous refinement of AI interaction patterns
+4. Documentation of lessons learned and best practices
+
+## Security Considerations
+
+1. Never expose sensitive information in prompts
+2. Implement proper authentication and authorization
+3. Review AI-generated security-related code with extra scrutiny
+4. Follow secure coding practices even with AI assistance 
