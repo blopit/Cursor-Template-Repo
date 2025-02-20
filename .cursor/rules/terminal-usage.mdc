@@ -1,5 +1,20 @@
 ---
-description: +
-globs: 
+description: Guidelines for efficient and safe usage of terminal commands within the Cursor development workflow.
+globs: *.*
 ---
- 
+
+# Terminal Usage Guidelines
+
+## Overview
+This document provides guidelines for efficient and safe usage of terminal commands within the Cursor development workflow.
+
+## Best Practices
+- Always run commands within the appropriate virtual environment.
+- Avoid using destructive operations without proper approval.
+- Log important outputs and errors for troubleshooting.
+- Verify command context (current directory, permissions) before execution.
+
+## Command Execution Guidelines
+- Follow repository conventions for executing terminal commands.
+- Validate multi-line commands using scripts.
+- Ensure terminal output is reviewed for any errors. 

@@ -1,0 +1,14 @@
+# Rule Declaration Guidelines
+
+## Overview
+This document outlines the principles and procedures for declaring rules in the Cursor system. It defines a standardized way for specifying agent rules, role responsibilities, and configuration standards.
+
+## Key Points
+- Clearly state rule definitions and associated metadata.
+- Utilize a consistent format for rule annotations across the project.
+- Maintain version history and rationale for changes in rules.
+
+## Usage
+- Include rule declarations in appropriate .mdc files.
+- Reference these guidelines when creating new rules.
+- Regularly review and update rules as the project evolves.

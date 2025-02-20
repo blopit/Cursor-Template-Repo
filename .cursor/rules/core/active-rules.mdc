@@ -1,0 +1,42 @@
+---
+description: Tracks and displays all active MDC rule files currently in use by the project.
+globs: **/*.mdc
+---
+
+# Active Rules Overview
+
+## Currently Active Rules
+
+### Core Rules
+- `core/rule-declaration.mdc`: Rule declaration standards and metadata specifications
+- `core/agent-specialization.mdc`: AI agent specialization and collaboration guidelines
+- `core/logging-standards.mdc`: Logging standards and best practices
+- `core/active-rules.mdc`: This file - tracks active rule files
+
+### Development Rules
+- `development-workflow.mdc`: Development workflow and practices
+- `iterative-development.mdc`: Iterative development guidelines
+- `error-patterns.mdc`: Error handling and debugging patterns
+- `feedback-loops.mdc`: Development feedback loop implementation
+
+### Technical Standards
+- `tech-standards.mdc`: Technology standards and coding practices
+- `general-software.mdc`: General software development guidelines
+- `terminal-usage.mdc`: Terminal command usage guidelines
+- `markdown/style.mdc`: Markdown documentation standards
+
+### Server Components
+- `mcp-server.mdc`: MCP server configuration and deployment
+- `mcp-server-usage.mdc`: MCP server usage guidelines
+
+### Role Definitions
+- `roles/database_specialist.mdc`: Database specialist role and responsibilities
+
+## Template Collections
+- `awesome-cursor-rules-mdc/`: Directory containing specialized rule templates for different tech stacks
+
+## Usage Instructions
+1. Reference this file to understand which rules are currently active
+2. Each rule entry includes its path and a brief description
+3. Rules are organized by category for easy reference
+4. Update this file when adding or removing rule files
