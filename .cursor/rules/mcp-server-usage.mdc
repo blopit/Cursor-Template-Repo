@@ -1,1 +1,254 @@
- 
+# MCP Server Usage Guidelines
+
+## Overview
+This document describes how to interact with and use the MCP Server. It includes common commands, troubleshooting tips, and best practices for server usage.
+
+## Common Commands
+- Starting the server: Use the designated start script or command.
+- Stopping the server: Ensure graceful shutdown using the stop command.
+- Checking server status: Verify server health and log outputs.
+
+## Troubleshooting
+- Review log files located in the server logs directory.
+- Check configuration files for common errors.
+- Use provided diagnostic commands to isolate issues.
+
+## Best Practices
+- Regularly update server configurations and dependencies.
+- Monitor server health and performance metrics.
+- Follow standardized deployment procedures for consistency.
+
+## Quick Start
+
+### Basic Server Setup
+```python
+from mcp_server import MCPServer
+from mcp_server.middleware import SecurityMiddleware, MetricsMiddleware
+
+async def main():
+    config = load_config()  # Load from environment or config file
+    server = MCPServer(config)
+    
+    # Add required middleware
+    server.add_middleware(SecurityMiddleware())
+    server.add_middleware(MetricsMiddleware())
+    
+    await server.start()
+```
+
+### Configuration Loading
+```python
+def load_config():
+    return {
+        "host": os.getenv("MCP_HOST", "localhost"),
+        "port": int(os.getenv("MCP_PORT", "8000")),
+        "workers": int(os.getenv("MCP_WORKERS", "4")),
+        "timeout": int(os.getenv("MCP_TIMEOUT", "30")),
+        "ssl_enabled": os.getenv("MCP_SSL_ENABLED", "false").lower() == "true"
+    }
+```
+
+## Development Workflow
+
+### 1. Local Development
+- Use test configuration
+- Enable debug mode
+- Disable SSL for local testing
+- Use in-memory storage when possible
+
+### 2. Testing
+- Write tests first (TDD approach)
+- Use test fixtures
+- Mock external services
+- Test error scenarios
+
+### 3. Deployment
+- Use proper environment variables
+- Enable SSL in production
+- Set appropriate worker count
+- Configure proper logging
+
+## Common Operations
+
+### Adding Routes
+```python
+@server.route("/api/data")
+async def handle_data(request):
+    try:
+        data = await request.json()
+        result = process_data(data)
+        return JSONResponse(result)
+    except Exception as e:
+        return ErrorResponse(str(e))
+```
+
+### Middleware Usage
+```python
+# Security middleware with custom settings
+server.add_middleware(SecurityMiddleware,
+    ssl_redirect=True,
+    allowed_hosts=["api.example.com"],
+    rate_limit={"requests": 100, "period": 60}
+)
+
+# Metrics middleware with custom settings
+server.add_middleware(MetricsMiddleware,
+    enable_timing=True,
+    track_endpoints=True,
+    metrics_path="/metrics"
+)
+```
+
+### Error Handling
+```python
+@server.exception_handler(CustomException)
+async def handle_custom_error(request, exc):
+    return {
+        "error": str(exc),
+        "code": exc.code,
+        "timestamp": datetime.utcnow().isoformat(),
+        "request_id": request.id
+    }
+```
+
+## Testing Examples
+
+### Server Tests
+```python
+@pytest.mark.asyncio
+async def test_server_startup():
+    config = get_test_config()
+    server = MCPServer(config)
+    
+    try:
+        await server.start()
+        assert server.is_running()
+        response = await client.get("/health")
+        assert response.status_code == 200
+    finally:
+        await server.shutdown()
+```
+
+### Route Tests
+```python
+@pytest.mark.asyncio
+async def test_data_endpoint():
+    async with TestClient(server) as client:
+        response = await client.post(
+            "/api/data",
+            json={"key": "value"}
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert "result" in data
+```
+
+## Maintenance Tasks
+
+### 1. Health Checks
+```python
+@server.route("/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "version": server.version
+    }
+```
+
+### 2. Metrics Collection
+```python
+@server.route("/metrics")
+async def get_metrics():
+    return {
+        "response_times": server.metrics.get_response_times(),
+        "error_rates": server.metrics.get_error_rates(),
+        "resource_usage": server.metrics.get_resource_usage()
+    }
+```
+
+### 3. Logging
+```python
+# Configure logging
+logging.config.dictConfig({
+    "version": 1,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "standard"
+        }
+    },
+    "formatters": {
+        "standard": {
+            "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        }
+    },
+    "loggers": {
+        "mcp_server": {
+            "handlers": ["console"],
+            "level": "INFO"
+        }
+    }
+})
+```
+
+## Troubleshooting Guide
+
+### Common Issues
+
+1. Server Won't Start
+   - Check configuration values
+   - Verify port availability
+   - Check SSL certificate paths
+   - Verify environment variables
+
+2. Performance Issues
+   - Check worker count
+   - Monitor resource usage
+   - Review middleware order
+   - Check database connections
+
+3. Security Alerts
+   - Verify SSL configuration
+   - Check security headers
+   - Review rate limits
+   - Audit access logs
+
+### Debug Mode
+```python
+# Enable debug mode for development
+config = {
+    **base_config,
+    "debug": True,
+    "log_level": "DEBUG",
+    "ssl_enabled": False
+}
+```
+
+## Best Practices Checklist
+
+### Development
+- [ ] Use type hints
+- [ ] Write comprehensive tests
+- [ ] Document all endpoints
+- [ ] Handle all errors gracefully
+
+### Deployment
+- [ ] Use proper SSL certificates
+- [ ] Set secure headers
+- [ ] Configure proper logging
+- [ ] Set up monitoring
+
+### Maintenance
+- [ ] Regular security updates
+- [ ] Performance monitoring
+- [ ] Log rotation
+- [ ] Backup strategy
+
+## Version Compatibility
+
+| MCP Version | Python Version | Key Features |
+|-------------|----------------|--------------|
+| 1.0.x       | >=3.8         | Basic server |
+| 1.1.x       | >=3.9         | Async support|
+| 1.2.x       | >=3.10        | Type hints   | 

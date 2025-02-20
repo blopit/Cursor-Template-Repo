@@ -1,1 +1,16 @@
- 
+# Logging Standards Guidelines
+
+## Overview
+This document outlines best practices and standards for logging within the Cursor project. It aims to ensure consistent, informative, and useful logging across all modules and agents.
+
+## Best Practices
+- Use standardized logging formats and templates.
+- Log errors, warnings, and informational messages consistently.
+- Include timestamps, log levels, and relevant context in each log entry.
+- Rotate logs regularly to prevent storage issues.
+- Ensure logs are accessible for debugging and auditing purposes.
+
+## Implementation
+- Use a centralized logging system if possible.
+- Integrate logging frameworks that support configuration management and scalability.
+- Maintain clear documentation on logging practices and updates.

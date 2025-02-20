@@ -1,5 +1,21 @@
 ---
-description: 
-globs: 
+description: Development workflow guidelines for planning, implementation, reviews, and deployment in the Cursor project.
+globs: *.*
 ---
+
+# Development Workflow Guidelines
+
+## Overview
+This document outlines the development workflow for the Cursor project. It provides guidance on task planning, iterative development, code reviews, and deployment practices.
+
+## Workflow Stages
+- **Planning:** Define tasks, set milestones, and coordinate between the Planner and Executor.
+- **Implementation:** Write code following best practices and established standards.
+- **Review:** Conduct code reviews and run tests to ensure quality.
+- **Deployment:** Use CI/CD pipelines for streamlined deployment.
+- **Feedback & Iteration:** Gather feedback, monitor performance, and continuously improve.
+
+## Roles and Responsibilities
+- **Planner:** Defines high-level tasks and coordinates planning.
+- **Executor:** Implements tasks, writes code, and handles testing.
  

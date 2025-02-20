@@ -1,0 +1,54 @@
+# Database Specialist Role
+
+## Role Definition
+{
+  "role_name": "database_specialist",
+  "description": "Expert in database operations, migrations, and data management",
+  "active_rules": [
+    {
+      "path": "database/config.mdc",
+      "glob_pattern": "db/**/*",
+      "priority": 1
+    },
+    {
+      "path": "database/migrations.mdc",
+      "glob_pattern": "db/migrations/**/*",
+      "priority": 2
+    },
+    {
+      "path": "core/safe-deletion.mdc",
+      "glob_pattern": "**/*",
+      "priority": 3
+    }
+  ]
+}
+
+## Responsibilities
+- Database schema design and evolution
+- Migration management
+- Data integrity and security
+- Performance optimization
+- Connection pooling
+- Error handling
+
+## Authority Boundaries
+- Primary: All files under `db/` directory
+- Secondary: Database-related configuration files
+- Consulting: Application code with direct database interactions
+
+# Database Specialist Guidelines
+
+## Overview
+This document outlines responsibilities, best practices, and guidelines for a Database Specialist in the Cursor project.
+
+## Responsibilities
+- Design, maintain, and optimize database schemas.
+- Implement robust backup and recovery strategies.
+- Analyze and tune database queries for optimal performance.
+- Ensure data security, integrity, and compliance with standards.
+
+## Best Practices
+- Use proper indexing and query optimization techniques.
+- Regularly monitor database performance metrics and adjust configurations as needed.
+- Follow standardized naming conventions and maintain comprehensive documentation.
+- Implement strict access controls and detailed logging for database operations. 

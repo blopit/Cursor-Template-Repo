@@ -268,6 +268,38 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
 - **Retrospective Insights:** Log any mistakes, debugging tips, or configuration changes that can inform future iterations.
 - **Documentation:** Note adjustments to tool usage or integration processes (e.g., specific model names, commit message conventions).
 
+- Understanding Cursor Rules:
+  - Think of Cursor rules like an office departure checklist:
+    - Just as team members have routines before leaving (lock doors, turn off lights, etc.)
+    - Cursor rules are AI's checklist for coding tasks (code style, tools to use, etc.)
+  - Benefits of structured rules:
+    - Consistency: Everyone follows the same practices
+    - Quality: Nothing important gets forgotten
+    - Efficiency: No need to repeat instructions for common tasks
+  - Role-Based Organization:
+    - Each role has a dedicated MDC file in `.cursor/rules/roles/`
+    - Roles define:
+      - Active rules and their priorities
+      - Glob patterns for file matching
+      - Responsibilities and authority boundaries
+    - Benefits:
+      - Clear separation of concerns
+      - Easy to understand and maintain
+      - Simple role declaration
+  - Role Declaration:
+    - AI agents simply state their role:
+      ```yaml
+      role: database_specialist
+      ```
+    - System automatically loads:
+      - All associated rules
+      - Glob patterns
+      - Authority boundaries
+    - Benefits:
+      - Reduced boilerplate
+      - Consistent rule application
+      - Clear audit trail
+
 ## Database Configuration Rules
 
 ### Environment-Specific Database Standards
@@ -442,7 +474,7 @@ codebase-structure: when coding anything
 general-software: General software development best practices and guidelines
 safe-deletion: Guidelines for safe deletion of resources and data
 terminal-usage: +
-tdd: Test-Driven Development guidelines and best practices
+iterative-development: Best practices for iterative development with Composer AI Assistant
 </available_instructions>
 
 ## Environment-Specific Standards
