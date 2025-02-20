@@ -1,0 +1,26 @@
+---
+description: Standards and best practices for writing consistent and well-structured Markdown documentation in the Cursor project.
+globs: **/*.md, **/*.mdx, **/*.mdc
+---
+
+# Markdown Style Guidelines
+
+## Overview
+This document provides standards and best practices for writing Markdown files within the Cursor project. It covers guidelines for headings, lists, code formatting, links, and overall structure to ensure consistency across the codebase.
+
+## Guidelines
+- Use hierarchical headings (H1 for titles, H2 for major sections, H3 for subsections, etc.).
+- Use bullet lists for unordered items and numbered lists for sequences or steps.
+- Format code blocks using triple backticks and specify the language when possible.
+- Use inline code formatting for commands and code snippets.
+- Ensure files are well-structured, with descriptive titles and clear section headings.
+
+## Best Practices
+- Validate Markdown formatting using linting tools or built-in validators.
+- Keep the style consistent across all project documentation.
+- Link to related documentation, guidelines, and external resources as needed.
+- Regularly review and update the style guidelines to align with project evolution.
+
+## Additional Considerations
+- Prefer adherence to CommonMark or GitHub-Flavored Markdown specifications.
+- Test rendered Markdown in different environments to ensure readability and proper display.

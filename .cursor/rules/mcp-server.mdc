@@ -1,1 +1,24 @@
- 
+---
+description: Guidelines for configuring, deploying, and maintaining the MCP Server component.
+globs: *.*
+---
+
+# MCP Server Guidelines
+
+## Purpose
+This document provides guidelines for configuring, deploying, and maintaining the MCP (Multi-Cursor Platform) Server component.
+
+## Setup & Configuration
+- Ensure all required environment variables are set for server configuration.
+- Configure network settings and security (e.g., firewall rules, SSL/TLS).
+- Follow best practices for deployment, including containerization and scaling strategies.
+
+## Monitoring & Maintenance
+- Regularly review performance logs and server metrics.
+- Implement automated alerts for critical issues.
+- Schedule regular maintenance, updates, and security patches.
+
+## Best Practices
+- Use standardized naming conventions for servers and related resources.
+- Isolate different environments (dev, test, prod).
+- Secure sensitive data through environment variables and secret management. 

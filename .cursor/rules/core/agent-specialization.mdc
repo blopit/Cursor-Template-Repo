@@ -1,0 +1,21 @@
+---
+description: Guidelines for defining and managing specialized AI agents within the Cursor system, ensuring clear responsibilities and efficient collaboration.
+globs: **/*
+---
+
+# Agent Specialization Guidelines
+
+## Overview
+This document details the key principles of agent specialization within the Cursor system. It explains how different agents should define their scopes and responsibilities to prevent overlap and ensure efficient collaboration.
+
+## Key Principles
+- **Role Clarity:** Define clear responsibilities for each agent based on their domain expertise.
+- **Modularity:** Maintain distinct boundaries between agents to avoid redundant functionalities.
+- **Collaboration:** Enable communication channels for agents when responsibilities intersect.
+- **Adaptability:** Periodically review and adjust agent specializations to align with evolving project demands.
+
+## Best Practices
+- Document all agent roles and responsibilities in the system guidelines.
+- Use consistent naming conventions for agent roles.
+- Update specializations as new roles are introduced or responsibilities shift.
+- Ensure regular reviews and audits of agent tasks to improve efficiency.
