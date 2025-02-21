@@ -1,0 +1,21 @@
+# Development Dependencies
+pytest>=8.3.4
+pytest-asyncio>=0.25.3
+pytest-cov>=4.1.0  # Coverage reports
+matplotlib>=3.10.0  # Visualization for development
+seaborn>=0.13.2    # Additional plotting
+tabulate>=0.9.0    # Development data formatting
+tqdm>=4.67.1       # Progress bars for development scripts
+
+# Development Tools
+python-dotenv>=1.0.1  # Environment management
+playwright>=1.50.0    # Web automation for testing
+duckduckgo-search>=7.4.3  # Search capabilities for development
+
+# Linting and Type Checking
+mypy>=1.8.0
+pylint>=3.0.3
+black>=24.1.1
+isort>=5.13.2
+
+-r requirements.txt  # Include base requirements 
