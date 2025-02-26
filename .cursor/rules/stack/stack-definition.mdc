@@ -1,0 +1,356 @@
+---
+description: Technology stack definition for full-stack application development
+globs: **/*.{js,ts,jsx,tsx,py,java,go,rb,php,html,css,scss}
+version: 1.0.0
+author: Cursor AI
+tags: stack, technology, frontend, backend, database, devops
+---
+
+# Technology Stack Definition
+
+This document defines the standard technology stack for full-stack application development, covering frontend, backend, database, and DevOps components.
+
+## Core Stack Components
+
+### Frontend
+
+| Component | Technology | Version | Purpose |
+|-----------|------------|---------|---------|
+| Framework | React | 18.x | UI component library |
+| Meta-framework | Next.js | 14.x | React framework with SSR/SSG |
+| State Management | Redux Toolkit | 2.x | Global state management |
+| Styling | Tailwind CSS | 3.x | Utility-first CSS framework |
+| Component Library | Shadcn UI | latest | Accessible component system |
+| Form Handling | React Hook Form | 7.x | Form state management |
+| Validation | Zod | 3.x | Schema validation |
+| Testing | Vitest + React Testing Library | latest | Unit and component testing |
+| E2E Testing | Playwright | latest | End-to-end testing |
+
+### Backend
+
+| Component | Technology | Version | Purpose |
+|-----------|------------|---------|---------|
+| Runtime | Node.js | 20.x LTS | JavaScript runtime |
+| Framework | Express.js | 4.x | Web framework |
+| API | REST + GraphQL | - | API paradigms |
+| GraphQL | Apollo Server | 4.x | GraphQL implementation |
+| Authentication | JWT + OAuth 2.0 | - | Authentication protocols |
+| Validation | Zod | 3.x | Schema validation |
+| Testing | Jest | 29.x | Unit and integration testing |
+
+### Database
+
+| Component | Technology | Version | Purpose |
+|-----------|------------|---------|---------|
+| Primary Database | PostgreSQL | 16.x | Relational database |
+| ORM | Prisma | 5.x | Database toolkit |
+| Migrations | Prisma Migrate | - | Database schema migrations |
+| Caching | Redis | 7.x | In-memory data store |
+| Search | Elasticsearch | 8.x | Full-text search engine |
+
+### DevOps
+
+| Component | Technology | Version | Purpose |
+|-----------|------------|---------|---------|
+| Containerization | Docker | latest | Application containerization |
+| Orchestration | Kubernetes | latest | Container orchestration |
+| CI/CD | GitHub Actions | - | Continuous integration/deployment |
+| Infrastructure as Code | Terraform | latest | Infrastructure provisioning |
+| Monitoring | Prometheus + Grafana | latest | Metrics and visualization |
+| Logging | ELK Stack | latest | Log aggregation and analysis |
+
+## Technology Selection Criteria
+
+When selecting technologies for the stack, the following criteria were considered:
+
+1. **Maturity**: Preference for stable, well-established technologies
+2. **Community Support**: Active community and regular updates
+3. **Performance**: Optimal performance characteristics for the use case
+4. **Developer Experience**: Ease of use and productivity
+5. **Scalability**: Ability to scale with application growth
+6. **Security**: Built-in security features and regular security updates
+7. **Integration**: Seamless integration with other stack components
+8. **Documentation**: Comprehensive and up-to-date documentation
+
+## Implementation Guidelines
+
+### Frontend Implementation
+
+#### Project Structure
+
+```
+frontend/
+├── public/              # Static assets
+├── src/
+│   ├── app/             # Next.js App Router
+│   │   ├── ui/          # Basic UI components
+│   │   └── features/    # Feature-specific components
+│   ├── hooks/           # Custom React hooks
+│   ├── lib/             # Utility functions and libraries
+│   ├── store/           # Redux store configuration
+│   │   ├── slices/      # Redux slices
+│   │   └── index.ts     # Store configuration
+│   ├── styles/          # Global styles
+│   └── types/           # TypeScript type definitions
+├── .eslintrc.js         # ESLint configuration
+├── .prettierrc          # Prettier configuration
+├── jest.config.js       # Jest configuration
+├── next.config.js       # Next.js configuration
+├── package.json         # Dependencies and scripts
+├── tailwind.config.js   # Tailwind CSS configuration
+└── tsconfig.json        # TypeScript configuration
+```
+
+#### Coding Standards
+
+- Use TypeScript for all frontend code
+- Follow functional component patterns with hooks
+- Implement proper error boundaries
+- Use React Query for data fetching and caching
+- Implement responsive design using Tailwind's utilities
+- Follow accessibility best practices (WCAG 2.1 AA)
+
+### Backend Implementation
+
+#### Project Structure
+
+```
+backend/
+├── src/
+│   ├── api/             # API routes and controllers
+│   │   ├── controllers/ # Request handlers
+│   │   ├── middlewares/ # Express middlewares
+│   │   ├── routes/      # Route definitions
+│   │   └── validators/  # Request validation
+│   ├── config/          # Application configuration
+│   ├── db/              # Database connection and models
+│   ├── graphql/         # GraphQL schema and resolvers
+│   ├── services/        # Business logic
+│   ├── types/           # TypeScript type definitions
+│   ├── utils/           # Utility functions
+│   └── app.ts           # Express application setup
+├── .eslintrc.js         # ESLint configuration
+├── .prettierrc          # Prettier configuration
+├── jest.config.js       # Jest configuration
+├── nodemon.json         # Nodemon configuration
+├── package.json         # Dependencies and scripts
+├── tsconfig.json        # TypeScript configuration
+└── prisma/              # Prisma schema and migrations
+    ├── schema.prisma    # Database schema
+    └── migrations/      # Migration files
+```
+
+#### Coding Standards
+
+- Use TypeScript for all backend code
+- Implement proper error handling and logging
+- Follow RESTful API design principles
+- Use dependency injection for services
+- Implement proper authentication and authorization
+- Follow security best practices (OWASP Top 10)
+
+### Database Implementation
+
+#### Schema Design Principles
+
+- Use appropriate data types for columns
+- Implement proper indexing for frequently queried fields
+- Use foreign key constraints for referential integrity
+- Implement soft deletes where appropriate
+- Use enums for fixed sets of values
+- Follow naming conventions for tables and columns
+
+#### Example Prisma Schema
+
+```prisma
+// Example Prisma schema
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String
+  role          Role      @default(USER)
+  posts         Post[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([email])
+}
+
+model Post {
+  id            String    @id @default(cuid())
+  title         String
+  content       String?
+  published     Boolean   @default(false)
+  author        User      @relation(fields: [authorId], references: [id])
+  authorId      String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([authorId])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+```
+
+### DevOps Implementation
+
+#### CI/CD Pipeline
+
+```yaml
+# Example GitHub Actions workflow
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run linting
+        run: npm run lint
+      - name: Run tests
+        run: npm test
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm ci
+      - name: Build application
+        run: npm run build
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: build/
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build
+          path: build/
+      - name: Deploy to production
+        run: |
+          # Deployment steps
+```
+
+#### Docker Configuration
+
+```dockerfile
+# Example Dockerfile for Node.js application
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV production
+
+COPY --from=builder /app/package*.json ./
+RUN npm ci --production
+
+COPY --from=builder /app/dist ./dist
+
+USER node
+
+CMD ["node", "dist/app.js"]
+```
+
+## Alternative Stacks
+
+### Alternative Frontend Stack
+
+| Component | Technology | Considerations |
+|-----------|------------|----------------|
+| Framework | Vue.js | Better for teams familiar with Vue |
+| Meta-framework | Nuxt.js | Vue equivalent of Next.js |
+| State Management | Pinia | Simpler than Redux |
+| Styling | Sass | More powerful but less utility-focused |
+
+### Alternative Backend Stack
+
+| Component | Technology | Considerations |
+|-----------|------------|----------------|
+| Runtime | Deno | Better security, but fewer packages |
+| Framework | NestJS | More structured, Angular-like |
+| Language | Python (FastAPI) | Better for data science integration |
+| Language | Go | Better performance, but steeper learning curve |
+
+### Alternative Database Stack
+
+| Component | Technology | Considerations |
+|-----------|------------|----------------|
+| Database | MongoDB | Better for document-oriented data |
+| Database | MySQL | More widely used than PostgreSQL |
+| ORM | TypeORM | More traditional ORM approach |
+| ORM | Sequelize | Mature ORM with good migration support |
+
+## Stack Evolution
+
+The technology stack should be reviewed and updated regularly:
+
+- Quarterly review of minor version updates
+- Semi-annual review of major version updates
+- Annual review of stack components
+- Deprecation plan for technologies being phased out
+
+## Related Rules
+
+- [frontend/react-nextjs](../tech/frontend/react-nextjs.mdc): Specific guidelines for React and Next.js development
+- [typescript/style](../typescript/style.mdc): TypeScript coding standards
+- [database/config](../database/config.mdc): Database configuration guidelines
+
+## References
+
+- [React Documentation](https://react.dev/)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Prisma Documentation](https://www.prisma.io/docs)
+- [Node.js Best Practices](https://github.com/goldbergyoni/nodebestpractices)
+
+## Changelog
+
+- 1.0.0: Initial version 
