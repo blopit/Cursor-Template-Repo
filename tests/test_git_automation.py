@@ -4,6 +4,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 import os
 import tempfile
+import subprocess
 from tools.git_automation import (
     run_command,
     get_changed_files,

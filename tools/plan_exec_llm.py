@@ -7,7 +7,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import sys
 import time
-from token_tracker import TokenUsage, APIResponse, get_token_tracker
+from tools.token_tracker import TokenUsage, APIResponse, get_token_tracker
 
 STATUS_FILE = '.cursorrules'
 
