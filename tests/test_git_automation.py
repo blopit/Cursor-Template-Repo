@@ -93,36 +93,49 @@ class TestGitAutomation(unittest.TestCase):
         # Mock changed files
         mock_get_files.return_value = ['file1.py', 'file2.py']
         
-        # Test commit
-        commit_changes("Test commit")
-        
-        # Verify git commands
-        mock_run.assert_any_call(['git', 'add', 'file1.py', 'file2.py'])
-        mock_run.assert_any_call(['git', 'commit', '-F', 'temp_commit_msg'])
+        # Mock os.unlink to prevent file not found error
+        with patch('os.unlink') as mock_unlink:
+            # Test commit
+            commit_changes("Test commit")
+            
+            # Verify git commands
+            mock_run.assert_any_call(['git', 'add', 'file1.py', 'file2.py'])
+            mock_run.assert_any_call(['git', 'commit', '-F', 'temp_commit_msg'])
+            
+            # Verify unlink was called with the correct filename
+            mock_unlink.assert_called_once_with('temp_commit_msg')
     
+    @patch('tools.git_automation.get_branch_name')
     @patch('tools.git_automation.run_command')
-    def test_create_pr(self, mock_run):
+    @patch('tempfile.NamedTemporaryFile')
+    @patch('os.unlink')
+    def test_create_pr(self, mock_unlink, mock_temp, mock_run, mock_branch):
         """Test creating a pull request."""
+        # Mock branch name
+        mock_branch.return_value = 'feature/test'
+        
         # Mock gh cli check
         mock_run.return_value = MagicMock()
         
-        # Mock tempfile
-        with patch('tempfile.NamedTemporaryFile') as mock_temp:
-            mock_file = MagicMock()
-            mock_temp.return_value.__enter__.return_value = mock_file
-            mock_file.name = 'temp_pr_body'
-            
-            # Test PR creation
-            create_pr("Test PR", "PR description")
-            
-            # Verify gh command
-            mock_run.assert_any_call(['gh', '--version'])
-            mock_run.assert_any_call([
-                'gh', 'pr', 'create',
-                '--title', '[Cursor] Test PR',
-                '--body-file', 'temp_pr_body',
-                '--base', 'main'
-            ])
+        # Mock file operations
+        mock_file = MagicMock()
+        mock_temp.return_value.__enter__.return_value = mock_file
+        mock_file.name = 'temp_pr_body'
+        
+        # Test PR creation
+        create_pr("Test PR", "PR description")
+        
+        # Verify gh command
+        mock_run.assert_any_call(['gh', '--version'])
+        mock_run.assert_any_call([
+            'gh', 'pr', 'create',
+            '--title', '[Cursor] Test PR',
+            '--body-file', 'temp_pr_body',
+            '--base', 'main'
+        ])
+        
+        # Verify unlink was called with the correct filename
+        mock_unlink.assert_called_once_with('temp_pr_body')
     
     @patch('tools.git_automation.run_command')
     def test_create_feature_branch(self, mock_run):
