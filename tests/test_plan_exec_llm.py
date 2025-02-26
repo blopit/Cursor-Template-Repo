@@ -6,10 +6,8 @@ from unittest.mock import patch, MagicMock
 from pathlib import Path
 import sys
 
-# Add the parent directory to the Python path so we can import the module
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from tools.plan_exec_llm import load_environment, read_plan_status, read_file_content, create_llm_client, query_llm
-from tools.plan_exec_llm import TokenUsage
+from tools.token_tracker import TokenUsage
 
 class TestPlanExecLLM(unittest.TestCase):
     def setUp(self):
