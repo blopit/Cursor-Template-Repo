@@ -191,3 +191,28 @@ session_*.json
 !.cursor/snippets/
 !.cursor/metrics/
 !.cursor/README.md
+
+# Environment files
+.env.development
+.env.test
+.env.production
+.env.backup.*
+
+# Keep example files
+!.env.example
+!.env.*.example
+
+# Logs
+logs/
+
+# Virtual Environment
+venv/
+.venv/
+ENV/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
