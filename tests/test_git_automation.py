@@ -4,6 +4,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 import os
 import tempfile
+import subprocess
 from tools.git_automation import (
     run_command,
     get_changed_files,
@@ -105,17 +106,23 @@ class TestGitAutomation(unittest.TestCase):
         # Mock gh cli check
         mock_run.return_value = MagicMock()
         
-        # Test PR creation
-        create_pr("Test PR", "PR description")
-        
-        # Verify gh command
-        mock_run.assert_any_call(['gh', '--version'])
-        mock_run.assert_any_call([
-            'gh', 'pr', 'create',
-            '--title', '[Cursor] Test PR',
-            '--body-file', mock_run.call_args[0][0][4],
-            '--base', 'main'
-        ])
+        # Mock tempfile
+        with patch('tempfile.NamedTemporaryFile') as mock_temp:
+            mock_file = MagicMock()
+            mock_temp.return_value.__enter__.return_value = mock_file
+            mock_file.name = 'temp_pr_body'
+            
+            # Test PR creation
+            create_pr("Test PR", "PR description")
+            
+            # Verify gh command
+            mock_run.assert_any_call(['gh', '--version'])
+            mock_run.assert_any_call([
+                'gh', 'pr', 'create',
+                '--title', '[Cursor] Test PR',
+                '--body-file', 'temp_pr_body',
+                '--base', 'main'
+            ])
     
     @patch('tools.git_automation.run_command')
     def test_create_feature_branch(self, mock_run):
