@@ -1,0 +1,588 @@
+---
+description: Standards for setting up and maintaining CI/CD pipelines for software projects
+globs: **/.github/workflows/**, **/azure-pipelines.yml, **/Jenkinsfile, **/gitlab-ci.yml, **/bitbucket-pipelines.yml, **/cloudbuild.yaml
+version: 1.0.0
+author: Cursor AI
+tags: workflow, deployment, CI/CD, DevOps
+---
+
+# Deployment Pipeline Standards
+
+This rule defines standards for setting up and maintaining Continuous Integration and Continuous Deployment (CI/CD) pipelines for software projects, ensuring reliable, consistent, and efficient deployment processes.
+
+## Pipeline Structure
+
+### 1. Core Pipeline Stages
+
+Every deployment pipeline should include the following stages:
+
+1. **Build**: Compile code, resolve dependencies, and create artifacts
+2. **Test**: Run automated tests (unit, integration, etc.)
+3. **Analysis**: Perform static code analysis and security scanning
+4. **Staging**: Deploy to a staging environment for verification
+5. **Approval**: Require manual approval for production deployments
+6. **Production**: Deploy to production environment
+7. **Verification**: Verify the deployment was successful
+
+```yaml
+# Example GitHub Actions workflow
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: dist/
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test
+
+  analyze:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run ESLint
+        run: npm run lint
+      - name: Run security scan
+        uses: snyk/actions/node@master
+        with:
+          args: --severity-threshold=high
+
+  deploy-staging:
+    needs: [test, analyze]
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+          path: dist/
+      - name: Deploy to staging
+        run: |
+          # Deployment script for staging
+          echo "Deploying to staging environment"
+
+  deploy-production:
+    needs: [test, analyze]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://example.com
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+          path: dist/
+      - name: Deploy to production
+        run: |
+          # Deployment script for production
+          echo "Deploying to production environment"
+      
+  verify:
+    needs: [deploy-staging, deploy-production]
+    if: always() && (needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify deployment
+        run: |
+          # Verification script
+          echo "Verifying deployment"
+```
+
+### 2. Environment-Specific Configurations
+
+Define separate configurations for each environment:
+
+- **Development**: Automatic deployments, minimal approvals
+- **Staging/QA**: Automatic deployments with basic verification
+- **Production**: Manual approval, comprehensive verification
+
+```yaml
+# Example environment-specific configuration
+environments:
+  development:
+    url: https://dev.example.com
+    auto_deploy: true
+    required_approvals: 0
+    verification_steps:
+      - basic_health_check
+  
+  staging:
+    url: https://staging.example.com
+    auto_deploy: true
+    required_approvals: 1
+    verification_steps:
+      - basic_health_check
+      - smoke_tests
+  
+  production:
+    url: https://example.com
+    auto_deploy: false
+    required_approvals: 2
+    verification_steps:
+      - basic_health_check
+      - smoke_tests
+      - performance_check
+      - security_verification
+```
+
+## Pipeline Components
+
+### 1. Triggers
+
+Define clear triggers for pipeline execution:
+
+- **Push Triggers**: Specify branches that trigger the pipeline
+- **Pull Request Triggers**: Run pipelines for pull requests
+- **Schedule Triggers**: Run pipelines on a schedule
+- **Manual Triggers**: Allow manual execution
+
+```yaml
+# Example triggers configuration
+triggers:
+  push:
+    branches:
+      - main
+      - develop
+      - feature/*
+    exclude:
+      - docs/*
+  
+  pull_request:
+    branches:
+      - main
+      - develop
+  
+  schedule:
+    - cron: '0 0 * * *'  # Daily at midnight UTC
+  
+  manual: true
+```
+
+### 2. Build Configuration
+
+Standardize build processes:
+
+- Use consistent build tools and versions
+- Cache dependencies to speed up builds
+- Set up matrix builds for multi-platform support
+- Store build artifacts for later stages
+
+```yaml
+# Example build configuration
+build:
+  matrix:
+    os: [ubuntu-latest, windows-latest, macos-latest]
+    node-version: [16.x, 18.x]
+  
+  cache:
+    paths:
+      - node_modules/
+    key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+  
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week
+```
+
+### 3. Testing Strategy
+
+Implement comprehensive testing:
+
+- Run unit tests in parallel
+- Execute integration tests against isolated environments
+- Perform end-to-end tests on staging
+- Set up test coverage reporting
+
+```yaml
+# Example testing configuration
+testing:
+  unit:
+    command: npm run test:unit
+    coverage:
+      minimum: 80%
+      report_path: coverage/
+  
+  integration:
+    command: npm run test:integration
+    environment: test
+    timeout: 10m
+  
+  e2e:
+    command: npm run test:e2e
+    environment: staging
+    timeout: 30m
+    retry:
+      max_attempts: 3
+      interval: 5m
+```
+
+### 4. Deployment Strategy
+
+Define deployment approaches:
+
+- **Blue-Green Deployment**: Maintain two identical environments
+- **Canary Deployment**: Gradually roll out to a subset of users
+- **Rolling Deployment**: Update instances one at a time
+
+```yaml
+# Example deployment strategy configuration
+deployment:
+  strategy: blue-green
+  
+  blue-green:
+    swap_method: route
+    health_check:
+      path: /health
+      timeout: 5m
+    rollback:
+      automatic: true
+      threshold: 10%  # Error threshold for automatic rollback
+  
+  canary:
+    initial_percentage: 10
+    increment: 20
+    interval: 15m
+    metrics:
+      - error_rate
+      - response_time
+    thresholds:
+      error_rate: 1%
+      response_time: 500ms
+```
+
+## Pipeline Best Practices
+
+### 1. Security
+
+Implement security measures in the pipeline:
+
+- Scan for vulnerabilities in dependencies
+- Perform static application security testing (SAST)
+- Scan container images for vulnerabilities
+- Use secrets management for sensitive data
+
+```yaml
+# Example security configuration
+security:
+  dependency_scanning:
+    tool: snyk
+    severity_threshold: high
+  
+  sast:
+    tool: sonarqube
+    quality_gate: strict
+  
+  container_scanning:
+    tool: trivy
+    ignore_unfixed: true
+  
+  secrets:
+    provider: vault
+    path: secrets/myapp
+```
+
+### 2. Monitoring and Notifications
+
+Set up monitoring and notifications:
+
+- Send notifications for pipeline failures
+- Alert on deployment issues
+- Monitor deployment metrics
+- Track pipeline performance
+
+```yaml
+# Example monitoring configuration
+monitoring:
+  notifications:
+    channels:
+      - slack: "#deployments"
+      - email: "team@example.com"
+    events:
+      - pipeline_failure
+      - deployment_started
+      - deployment_completed
+      - deployment_failed
+  
+  metrics:
+    - pipeline_duration
+    - test_coverage
+    - deployment_frequency
+    - lead_time
+    - mean_time_to_recovery
+```
+
+### 3. Documentation
+
+Document pipeline configurations:
+
+- Include comments in pipeline files
+- Maintain a README with pipeline information
+- Document environment-specific configurations
+- Keep a changelog of pipeline changes
+
+```markdown
+# Deployment Pipeline Documentation
+
+## Overview
+This document describes the CI/CD pipeline for the Example Project.
+
+## Pipeline Stages
+1. **Build**: Compiles the application and creates artifacts
+2. **Test**: Runs unit and integration tests
+3. **Analysis**: Performs code quality and security analysis
+4. **Staging**: Deploys to the staging environment
+5. **Production**: Deploys to the production environment
+
+## Environments
+- **Development**: https://dev.example.com
+- **Staging**: https://staging.example.com
+- **Production**: https://example.com
+
+## Deployment Process
+1. Push changes to the appropriate branch
+2. Pipeline automatically builds and tests the changes
+3. For production deployments, manual approval is required
+4. After deployment, verification steps are executed
+
+## Troubleshooting
+Common issues and their solutions:
+- **Build failures**: Check dependency versions
+- **Test failures**: Run tests locally before pushing
+- **Deployment failures**: Check environment configurations
+```
+
+## Pipeline Templates
+
+### 1. Frontend Application
+
+Template for frontend applications (React, Angular, Vue, etc.):
+
+```yaml
+# Frontend Application Pipeline Template
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Build
+        run: npm run build
+      - name: Test
+        run: npm test
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-build
+          path: build/
+
+  deploy:
+    needs: build
+    if: success() && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://example.com
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-build
+          path: build/
+      - name: Deploy to CDN
+        run: |
+          # Deploy to CDN
+          echo "Deploying to CDN"
+```
+
+### 2. Backend API
+
+Template for backend API applications:
+
+```yaml
+# Backend API Pipeline Template
+name: Backend API CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-build
+          path: dist/
+
+  deploy:
+    needs: build
+    if: success() && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://api.example.com
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: backend-build
+          path: dist/
+      - name: Deploy to server
+        run: |
+          # Deploy to server
+          echo "Deploying to server"
+```
+
+### 3. Database Migrations
+
+Template for database migration pipelines:
+
+```yaml
+# Database Migration Pipeline Template
+name: Database Migrations
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'migrations/**'
+      - '.github/workflows/migrations.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up database tools
+        run: |
+          # Install database tools
+          echo "Installing database tools"
+      - name: Validate migrations
+        run: |
+          # Validate migration scripts
+          echo "Validating migrations"
+
+  apply-staging:
+    needs: validate
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+    steps:
+      - uses: actions/checkout@v3
+      - name: Apply migrations to staging
+        run: |
+          # Apply migrations to staging
+          echo "Applying migrations to staging"
+
+  apply-production:
+    needs: apply-staging
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://example.com
+    steps:
+      - uses: actions/checkout@v3
+      - name: Apply migrations to production
+        run: |
+          # Apply migrations to production
+          echo "Applying migrations to production"
+```
+
+## Common Pitfalls
+
+1. **Insufficient Testing**: Not running comprehensive tests before deployment
+2. **Missing Environment Variables**: Forgetting to configure environment variables
+3. **Inadequate Error Handling**: Not handling deployment failures properly
+4. **Slow Pipelines**: Creating pipelines that take too long to execute
+5. **Lack of Monitoring**: Not monitoring deployments for issues
+6. **Insecure Secrets**: Storing secrets in pipeline configuration files
+7. **No Rollback Strategy**: Not having a plan for rolling back failed deployments
+8. **Inconsistent Environments**: Having different configurations across environments
+
+## Related Rules
+
+- [documentation-standards](./documentation-standards.mdc): Standards for creating and maintaining documentation
+- [waterfall-tdd](./waterfall-tdd.mdc): Guidelines for integrating TDD with Waterfall
+
+## References
+
+- [GitHub Actions Documentation](https://docs.github.com/en/actions)
+- [GitLab CI/CD Documentation](https://docs.gitlab.com/ee/ci/)
+- [Jenkins Pipeline Documentation](https://www.jenkins.io/doc/book/pipeline/)
+- [Azure DevOps Pipelines Documentation](https://docs.microsoft.com/en-us/azure/devops/pipelines/)
+
+## Changelog
+
+- 1.0.0: Initial version

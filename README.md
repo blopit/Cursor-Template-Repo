@@ -1,6 +1,106 @@
-# Cursor-Template
+# Authentication Service (TDD Implementation)
 
-A comprehensive template for Git projects that use [Cursor](https://cursor.sh/), the AI-first IDE. This template provides a structured foundation for developing projects with Cursor, including AI-assisted development workflows, maintenance scripts, and best practices.
+This project demonstrates the implementation of an authentication service following the Test-Driven Development (TDD) approach within a Waterfall-TDD hybrid model. It provides functionality for user registration, login, password management, and profile updates.
+
+## Project Structure
+
+```
+├── docs/
+│   ├── requirements/       # Requirements documentation
+│   │   └── REQ-AUTH-001.md # User authentication requirements
+│   └── design/             # Design documentation
+│       └── DES-AUTH-001.md # User authentication design
+├── src/
+│   ├── services/           # Business services
+│   │   ├── auth-service.js     # Authentication service
+│   │   ├── email-service.js    # Email service
+│   │   └── password-service.js # Password service
+│   ├── repositories/       # Data access layer
+│   │   └── user-repository.js  # User repository
+│   └── index.js            # Main application entry point
+└── tests/
+    └── auth/               # Authentication tests
+        └── registration.test.js # User registration tests
+```
+
+## Features
+
+- **User Registration**: Register new users with email, password, and profile information
+- **Input Validation**: Validate email format, password complexity, and required fields
+- **Email Verification**: Send verification emails to new users
+- **Password Security**: Securely hash and verify passwords
+- **Error Handling**: Comprehensive error handling for various scenarios
+
+## Development Approach
+
+This project follows the Waterfall-TDD hybrid model, which combines the structured phase-based approach of Waterfall with the quality-focused iterative practices of TDD:
+
+1. **Requirements Analysis**: Documented in `docs/requirements/REQ-AUTH-001.md`
+2. **System Design**: Documented in `docs/design/DES-AUTH-001.md`
+3. **Implementation (TDD)**:
+   - Write failing tests first (`tests/auth/registration.test.js`)
+   - Implement minimal code to pass tests (`src/services/auth-service.js`)
+   - Refactor while maintaining passing tests
+4. **Verification & Quality Gates**: All tests must pass before proceeding
+5. **Deployment & Maintenance**: Automated deployment through CI/CD pipeline
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v14 or higher)
+- npm (v6 or higher)
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/auth-service-tdd.git
+cd auth-service-tdd
+
+# Install dependencies
+npm install
+```
+
+### Running the Application
+
+```bash
+# Start the application
+npm start
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Run tests in watch mode (for development)
+npm run test:watch
+```
+
+## Code Quality Standards
+
+- **Test Coverage**: Minimum 80% code coverage required
+- **Documentation**: All classes, methods, and functions are documented
+- **Error Handling**: Comprehensive error handling for all operations
+- **Security**: Password hashing, input validation, and secure defaults
+
+## Future Enhancements
+
+- Implement login functionality
+- Add password reset functionality
+- Implement profile management
+- Add session management
+- Integrate with a real database
+- Implement proper email sending
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 🎯 Purpose
 

@@ -1,0 +1,234 @@
+---
+description: Guidelines for integrating TDD practices within a Waterfall development model
+globs: **/*.{js,jsx,ts,tsx,py,java,rb,php,go,cs,c,cpp,h,hpp}
+version: 1.0.0
+author: Cursor AI
+tags: workflow, tdd, waterfall, development-process
+---
+
+# Waterfall-TDD Hybrid Workflow
+
+This rule defines guidelines for successfully integrating Test-Driven Development (TDD) practices within a traditional Waterfall development model, creating a hybrid approach that leverages the strengths of both methodologies.
+
+## Overview
+
+The Waterfall-TDD hybrid model combines the structured phase-based approach of Waterfall with the quality-focused iterative practices of TDD. This model ensures comprehensive planning and documentation while maintaining high code quality through continuous testing.
+
+## Workflow Phases
+
+### 1. Requirements Phase
+
+- Document comprehensive requirements with clear acceptance criteria
+- Define testable requirements that can be translated into automated tests
+- Create a requirements traceability matrix linking requirements to future tests
+- Review requirements with stakeholders and technical team members
+
+```markdown
+# Example Requirement Document
+
+## Feature: User Authentication [REQ-001]
+
+### Description
+Implement a secure user authentication system with registration, login, and password recovery.
+
+### Acceptance Criteria
+1. Users can register with email, password, and name
+2. Users can log in with email and password
+3. Users can request password reset via email
+4. Passwords must be securely hashed
+5. Failed login attempts are limited to prevent brute force attacks
+
+### Test Cases
+- TC-001: Successful user registration
+- TC-002: Registration with invalid email format
+- TC-003: Registration with existing email
+- TC-004: Successful user login
+- TC-005: Login with incorrect password
+- TC-006: Password reset request
+```
+
+### 2. Design Phase
+
+- Create high-level architecture and detailed design documents
+- Design for testability, including dependency injection and interface-based design
+- Define component interfaces and contracts
+- Create test plans that map to requirements
+- Design mock objects and test fixtures
+
+```markdown
+# Example Design Document
+
+## Component: AuthenticationService
+
+### Responsibilities
+- User registration
+- User login
+- Password reset
+
+### Interfaces
+```typescript
+interface IAuthenticationService {
+  register(email: string, password: string, name: string): Promise<Result<User>>;
+  login(email: string, password: string): Promise<Result<Session>>;
+  requestPasswordReset(email: string): Promise<Result<void>>;
+  resetPassword(token: string, newPassword: string): Promise<Result<void>>;
+}
+```
+
+### Dependencies
+- UserRepository
+- EmailService
+- TokenService
+
+### Test Strategy
+- Unit tests for each method with mocked dependencies
+- Integration tests for database interactions
+- End-to-end tests for complete authentication flows
+```
+
+### 3. Implementation Phase
+
+- Follow strict TDD practices during implementation
+- Write failing tests before implementing features
+- Implement minimal code to pass tests
+- Refactor while maintaining passing tests
+- Maintain continuous integration to detect integration issues early
+
+```typescript
+// Example TDD Implementation
+
+// 1. Write a failing test
+test('should register user with valid data', async () => {
+  // Arrange
+  const authService = new AuthService(mockUserRepo, mockEmailService);
+  const userData = {
+    email: 'user@example.com',
+    password: 'password123',
+    name: 'Test User'
+  };
+  
+  // Act
+  const result = await authService.registerUser(userData);
+  
+  // Assert
+  expect(result.success).toBe(true);
+  expect(mockUserRepo.save).toHaveBeenCalledWith(expect.objectContaining({
+    email: userData.email,
+    name: userData.name
+  }));
+  expect(mockEmailService.sendWelcomeEmail).toHaveBeenCalledWith(userData.email);
+});
+
+// 2. Implement minimal code to pass the test
+class AuthService {
+  constructor(userRepo, emailService) {
+    this.userRepo = userRepo;
+    this.emailService = emailService;
+  }
+  
+  async registerUser(userData) {
+    await this.userRepo.save({
+      email: userData.email,
+      name: userData.name,
+      passwordHash: this.hashPassword(userData.password)
+    });
+    
+    await this.emailService.sendWelcomeEmail(userData.email);
+    
+    return { success: true };
+  }
+  
+  hashPassword(password) {
+    // Simple implementation for now
+    return `hashed_${password}`;
+  }
+}
+```
+
+### 4. Verification Phase
+
+- Execute comprehensive test suites
+- Perform system testing against requirements
+- Conduct user acceptance testing
+- Validate that all requirements are met
+- Document test results and coverage
+
+### 5. Maintenance Phase
+
+- Continue TDD practices for bug fixes and enhancements
+- Maintain and expand test suites
+- Refactor code as needed while ensuring tests pass
+- Document changes and update requirements as necessary
+
+## Integration Principles
+
+### 1. Requirements-Driven Testing
+
+- Each requirement must have associated test cases
+- Test cases validate specific aspects of requirements
+- Requirements are considered "done" only when all tests pass
+- Test scenarios are reviewed alongside requirements
+
+### 2. Quality Gates
+
+- Define clear quality gates for phase transitions
+- Use automated tests as objective quality measures
+- Enforce code coverage thresholds
+- Require passing tests before proceeding to next phase
+
+```markdown
+# Quality Gates
+
+## Implementation to Verification Phase Transition
+- All unit tests must pass (100% success rate)
+- Code coverage must meet minimum thresholds:
+  - Overall coverage: ≥80%
+  - Critical paths: 100%
+- Static analysis must report no critical or high issues
+- Code review must be completed with all issues addressed
+
+## Verification to Deployment Phase Transition
+- All integration tests must pass
+- All acceptance tests must pass
+- Performance tests must meet defined thresholds
+- Security scans must report no critical or high vulnerabilities
+```
+
+### 3. Continuous Feedback
+
+- Implement continuous integration to provide rapid feedback
+- Review test results regularly
+- Address failing tests immediately
+- Use test metrics to guide process improvements
+
+## Best Practices
+
+1. **Start with Clear Requirements**: Ensure requirements are clear, testable, and agreed upon
+2. **Design for Testability**: Create modular, loosely coupled designs that facilitate testing
+3. **Automate Testing**: Automate as many tests as possible to enable continuous verification
+4. **Maintain Traceability**: Keep clear links between requirements, tests, and code
+5. **Balance Documentation**: Document enough to provide clarity without creating unnecessary overhead
+6. **Adapt as Needed**: Adjust the process based on project needs and team feedback
+
+## Common Pitfalls
+
+1. **Rigid Phase Transitions**: Being too strict about phase transitions can cause delays
+2. **Insufficient Test Coverage**: Not writing enough tests can lead to quality issues
+3. **Over-Engineering**: Designing too much upfront can lead to unnecessary complexity
+4. **Documentation Overload**: Creating excessive documentation can slow down development
+5. **Neglecting Refactoring**: Not refactoring code can lead to technical debt
+
+## Related Rules
+
+- [tdd-practices](./tdd-practices.mdc): Detailed guidelines for TDD practices
+- [documentation-standards](./documentation-standards.mdc): Standards for documentation
+- [waterfall-tdd-integration](../core/waterfall-tdd-integration.mdc): Core principles for integrating TDD with Waterfall
+
+## References
+
+- [Test-Driven Development by Example](https://www.amazon.com/Test-Driven-Development-Kent-Beck/dp/0321146530) by Kent Beck
+- [Clean Code](https://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882) by Robert C. Martin
+
+## Changelog
+
+- 1.0.0: Initial version 

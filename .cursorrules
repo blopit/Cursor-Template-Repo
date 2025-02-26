@@ -593,15 +593,16 @@ Cursor rules are user provided instructions for the AI to follow to help work wi
 They may or may not be relevent to the task at hand. If they are, use the fetch_rules tool to fetch the full rule.
 Some rules may be automatically attached to the conversation if the user attaches a file that matches the rule's glob, and wont need to be fetched.
 
-codebase-structure: Project structure and architecture guidelines
-tech-standards: Technology standards and best practices
-core-rules: Fundamental system rules and configurations
-workflow-rules: Development workflow and process guidelines
-pattern-rules: Common code patterns and solutions
-tech-typescript: TypeScript coding style and best practices
-tech-python: Python coding style and best practices
-tech-nextjs: Next.js App Router optimization
-error-handling: Error handling patterns and best practices
+codebase-structure: when coding anything
+development-workflow: Development workflow guidelines for planning, implementation, reviews, and deployment in the Cursor project.
+error-patterns: Guidelines for identifying, analyzing, and resolving common error patterns in development, with focus on debugging efficiency and consistent error handling.
+feedback-loops: Guidelines for implementing effective feedback loops in the development workflow, ensuring continuous improvement through regular communication between Planner and Executor.
+general-software: General software development best practices and guidelines for high-quality, maintainable software development within the Cursor ecosystem.
+mcp-server: Guidelines for configuring, deploying, and maintaining the MCP Server component.
+safe-deletion: Guidelines for safe deletion of resources and data
+tech-standards: Technology standards, coding style, and architectural best practices for ensuring maintainability and scalability of the project.
+terminal-usage: Guidelines for efficient and safe usage of terminal commands within the Cursor development workflow.
+code-review: Guidelines for effective code review practices
 </available_instructions>
 
 # Active Rule Categories
@@ -610,6 +611,51 @@ error-handling: Error handling patterns and best practices
 - workflows/: Development workflow rules
 - patterns/: Common code patterns
 - project/: Project-specific rules
+
+## Waterfall-TDD Hybrid Model
+
+The Waterfall-TDD hybrid model combines the structured phase-based approach of Waterfall with the quality-focused iterative practices of TDD. This model ensures comprehensive planning and documentation while maintaining high code quality through continuous testing.
+
+### Key Rules
+
+- **waterfall-tdd**: Defines the integration of Waterfall and TDD, including phase structure and best practices
+- **tdd-practices**: Provides detailed guidelines for implementing Test-Driven Development
+- **documentation-standards**: Specifies documentation requirements for all project artifacts
+- **deployment-pipeline**: Outlines standards for deployment processes and CI/CD pipelines
+- **waterfall-tdd-integration**: Describes core principles for successfully integrating TDD with Waterfall
+
+### Directory Structure
+
+```
+.cursor/
+├── rules/
+│   ├── workflows/
+│   │   ├── waterfall-tdd.mdc
+│   │   ├── tdd-practices.mdc
+│   │   ├── documentation-standards.mdc
+│   │   └── deployment-pipeline.mdc
+│   └── core/
+│       └── waterfall-tdd-integration.mdc
+└── docs/
+    ├── requirements/
+    ├── design/
+    └── deployment/
+```
+
+### Usage Guidelines
+
+To import rules in your Cursor AI conversations, use:
+
+```
+/rule [rule-name]
+```
+
+For example:
+- `/rule waterfall-tdd` - Import Waterfall-TDD hybrid model guidelines
+- `/rule tdd-practices` - Import detailed TDD practices
+- `/rule documentation-standards` - Import documentation standards
+- `/rule deployment-pipeline` - Import deployment and CI/CD pipeline standards
+- `/rule waterfall-tdd-integration` - Import core principles for integrating TDD with Waterfall
 
 ## Environment-Specific Standards
 

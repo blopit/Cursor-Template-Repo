@@ -1,1 +1,257 @@
- 
+---
+description: Strategies for optimizing full-stack application performance
+globs: **/*.{js,jsx,ts,tsx,py,java,rb,php,go,cs,html,css,scss}
+alwaysApply: false
+---
+
+# Full Stack Optimization Patterns
+
+This rule provides guidelines and best practices for optimizing performance across the full stack of web applications, from frontend to backend and database.
+
+## Core Principles
+
+### 1. Measure First, Optimize Later
+
+- Always establish performance baselines before optimization
+- Use profiling tools to identify actual bottlenecks
+- Focus optimization efforts on the most impactful areas
+- Validate improvements with metrics after changes
+
+### 2. End-to-End Perspective
+
+- Consider the entire request lifecycle
+- Optimize across all layers of the application
+- Understand dependencies between components
+- Balance frontend and backend optimizations
+
+### 3. Progressive Enhancement
+
+- Implement core functionality first
+- Add performance optimizations incrementally
+- Maintain compatibility with older browsers/devices
+- Prioritize critical user paths
+
+## Frontend Optimization
+
+### 1. Asset Optimization
+
+- Minimize and compress CSS and JavaScript
+- Optimize images with proper formats and compression
+- Implement lazy loading for non-critical resources
+- Use modern image formats (WebP, AVIF) with fallbacks
+
+```javascript
+// Example: Lazy loading images
+document.addEventListener("DOMContentLoaded", () => {
+  const lazyImages = document.querySelectorAll("img.lazy");
+  
+  if ("IntersectionObserver" in window) {
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const image = entry.target;
+          image.src = image.dataset.src;
+          image.classList.remove("lazy");
+          imageObserver.unobserve(image);
+        }
+      });
+    });
+    
+    lazyImages.forEach(image => imageObserver.observe(image));
+  } else {
+    // Fallback for browsers without IntersectionObserver
+    // ...
+  }
+});
+```
+
+### 2. Rendering Optimization
+
+- Minimize DOM manipulations
+- Avoid layout thrashing
+- Use CSS transforms and opacity for animations
+- Implement virtual scrolling for large lists
+
+```javascript
+// Example: Avoiding layout thrashing
+// Bad practice
+function updateLayout() {
+  const elements = document.querySelectorAll('.box');
+  
+  elements.forEach(el => {
+    const height = el.offsetHeight; // Forces layout calculation
+    el.style.height = (height * 1.5) + 'px'; // Forces layout recalculation
+  });
+}
+
+// Good practice
+function updateLayout() {
+  const elements = document.querySelectorAll('.box');
+  const heights = [];
+  
+  // Read phase
+  elements.forEach(el => {
+    heights.push(el.offsetHeight);
+  });
+  
+  // Write phase
+  elements.forEach((el, i) => {
+    el.style.height = (heights[i] * 1.5) + 'px';
+  });
+}
+```
+
+### 3. Network Optimization
+
+- Implement HTTP/2 or HTTP/3
+- Use CDNs for static assets
+- Implement proper caching strategies
+- Reduce the number of HTTP requests
+
+```html
+<!-- Example: Resource hints -->
+<link rel="preconnect" href="https://api.example.com">
+<link rel="preload" href="/fonts/main-font.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="prefetch" href="/assets/next-page.js">
+```
+
+## Backend Optimization
+
+### 1. Database Optimization
+
+- Index frequently queried fields
+- Optimize query patterns
+- Implement database caching
+- Use connection pooling
+
+```sql
+-- Example: Adding appropriate indexes
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_orders_user_id_created_at ON orders(user_id, created_at DESC);
+
+-- Example: Query optimization
+-- Before optimization
+SELECT * FROM orders WHERE user_id = 123 ORDER BY created_at DESC LIMIT 10;
+
+-- After optimization
+SELECT id, status, amount, created_at FROM orders WHERE user_id = 123 ORDER BY created_at DESC LIMIT 10;
+```
+
+### 2. API Optimization
+
+- Implement response compression
+- Use pagination for large datasets
+- Support partial responses
+- Implement efficient serialization
+
+```javascript
+// Example: API pagination
+app.get('/api/products', async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 20;
+  const skip = (page - 1) * limit;
+  
+  try {
+    const products = await Product.find()
+      .select('name price image') // Select only needed fields
+      .skip(skip)
+      .limit(limit)
+      .lean(); // Return plain objects instead of Mongoose documents
+    
+    const total = await Product.countDocuments();
+    
+    res.json({
+      products,
+      pagination: {
+        total,
+        pages: Math.ceil(total / limit),
+        page,
+        limit
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+```
+
+### 3. Caching Strategies
+
+- Implement multi-level caching
+- Use appropriate cache invalidation strategies
+- Cache expensive computations
+- Implement distributed caching for scalability
+
+```javascript
+// Example: Multi-level caching
+async function getProductDetails(productId) {
+  // Check memory cache first (fastest)
+  const memoryCache = await checkMemoryCache(productId);
+  if (memoryCache) return memoryCache;
+  
+  // Check Redis cache next
+  const redisCache = await checkRedisCache(productId);
+  if (redisCache) {
+    // Update memory cache
+    setMemoryCache(productId, redisCache);
+    return redisCache;
+  }
+  
+  // Fetch from database
+  const product = await fetchProductFromDatabase(productId);
+  
+  // Update caches
+  setRedisCache(productId, product);
+  setMemoryCache(productId, product);
+  
+  return product;
+}
+```
+
+## Infrastructure Optimization
+
+### 1. Server Configuration
+
+- Optimize web server settings
+- Configure appropriate resource limits
+- Implement load balancing
+- Use HTTP/2 or HTTP/3
+
+### 2. Content Delivery
+
+- Use CDNs for global distribution
+- Implement edge caching
+- Configure proper cache headers
+- Use compression for text-based resources
+
+### 3. Monitoring and Profiling
+
+- Implement real user monitoring (RUM)
+- Set up server-side performance monitoring
+- Use distributed tracing for complex systems
+- Establish performance budgets and alerts
+
+## Common Pitfalls
+
+1. **Premature Optimization**: Optimizing without measuring or before functionality is complete
+2. **Over-Optimization**: Adding complexity for minimal performance gains
+3. **Local-Only Testing**: Not testing performance in production-like environments
+4. **Ignoring Mobile**: Optimizing only for desktop performance
+5. **Single-Layer Focus**: Optimizing only frontend or backend without considering the full stack
+6. **Neglecting Maintenance**: Not revisiting optimizations as the application evolves
+
+## Related Rules
+
+- [clean-architecture](mdc:../architecture/clean-architecture.mdc)
+- [tech-standards](mdc:../../tech-standards.mdc)
+
+## References
+
+- [Web Vitals](mdc:https:/web.dev/vitals) - Google's core web vitals metrics
+- [High Performance Browser Networking](mdc:https:/hpbn.co) - Comprehensive guide to network optimization
+- [Database Performance Optimization](mdc:https:/use-the-index-luke.com) - SQL optimization guide
+
+## Changelog
+
+- 1.0.0: Initial version
+

@@ -1,0 +1,262 @@
+---
+description: Core principles for successfully integrating Test-Driven Development with Waterfall methodology
+globs: **/*.{js,ts,jsx,tsx,py,java,kt,go,rb,php,cs}
+version: 1.0.0
+author: Cursor AI
+tags: waterfall, tdd, integration, methodology, testing
+---
+
+# Waterfall-TDD Integration Core Principles
+
+This document defines the core principles for successfully integrating Test-Driven Development (TDD) practices within a traditional Waterfall development methodology.
+
+## Core Integration Principles
+
+### 1. Requirements as Testable Specifications
+
+Transform traditional Waterfall requirements into testable specifications:
+
+- Each requirement must be expressed in a way that can be verified through automated tests
+- Requirements should follow the "Given-When-Then" format where possible
+- Create a requirements traceability matrix that maps requirements to test cases
+- Involve QA teams during the requirements phase to ensure testability
+
+```gherkin
+# Example: Requirement as a testable specification
+Feature: User Authentication
+  
+  Scenario: Successful login
+    Given a user with email "user@example.com" and password "password123"
+    When the user attempts to log in with correct credentials
+    Then the user should be authenticated
+    And redirected to the dashboard page
+    And see a welcome message with their username
+```
+
+### 2. Test-First Design
+
+Incorporate test-first thinking into the design phase:
+
+- Create test plans and test cases before finalizing design documents
+- Design interfaces and components with testability in mind
+- Use test scenarios to validate design decisions
+- Establish clear contracts between components that can be verified through tests
+
+```java
+// Example: Interface designed with testability in mind
+public interface PaymentProcessor {
+    /**
+     * Process a payment transaction
+     * @param payment The payment details
+     * @return TransactionResult with status and transaction ID
+     * @throws PaymentDeclinedException if payment is declined
+     * @throws PaymentProcessingException if an error occurs during processing
+     */
+    TransactionResult processPayment(Payment payment) 
+        throws PaymentDeclinedException, PaymentProcessingException;
+}
+```
+
+### 3. Phased TDD Implementation
+
+Adapt TDD to fit within Waterfall phases:
+
+- **Requirements Phase**: Create acceptance tests based on requirements
+- **Design Phase**: Develop component and integration test specifications
+- **Implementation Phase**: Follow the Red-Green-Refactor cycle for unit tests
+- **Testing Phase**: Execute all test levels (unit, integration, system, acceptance)
+- **Maintenance Phase**: Add regression tests for bug fixes
+
+```mermaid
+graph TD
+    A[Requirements Phase] -->|Create Acceptance Tests| B[Design Phase]
+    B -->|Develop Test Specifications| C[Implementation Phase]
+    C -->|Red-Green-Refactor Cycle| D[Testing Phase]
+    D -->|Execute All Tests| E[Maintenance Phase]
+    E -->|Add Regression Tests| A
+```
+
+### 4. Continuous Verification
+
+Implement continuous testing throughout the Waterfall lifecycle:
+
+- Run automated tests after each significant change
+- Establish quality gates between Waterfall phases based on test results
+- Use test coverage metrics to measure progress
+- Implement continuous integration to detect integration issues early
+
+```yaml
+# Example: CI pipeline configuration
+stages:
+  - build
+  - unit_test
+  - integration_test
+  - system_test
+  - acceptance_test
+  - deploy
+
+unit_test:
+  stage: unit_test
+  script:
+    - run_unit_tests
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+integration_test:
+  stage: integration_test
+  script:
+    - run_integration_tests
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+```
+
+### 5. Documentation-Driven Testing
+
+Use tests as living documentation:
+
+- Write test descriptions that clearly explain requirements and expected behavior
+- Generate documentation from test cases
+- Keep test documentation synchronized with implementation
+- Use behavior-driven development (BDD) frameworks to bridge communication gaps
+
+```javascript
+// Example: Tests as documentation
+describe('User Authentication', () => {
+  describe('Login functionality', () => {
+    it('should authenticate a user with valid credentials', () => {
+      // Test implementation
+    });
+    
+    it('should reject a user with invalid credentials', () => {
+      // Test implementation
+    });
+    
+    it('should lock an account after 5 failed attempts', () => {
+      // Test implementation
+    });
+  });
+});
+```
+
+### 6. Feedback Loops Within Phases
+
+Create feedback loops within each Waterfall phase:
+
+- Implement shorter iterations within each phase
+- Use test results to guide refinement of deliverables
+- Conduct regular reviews of test quality and coverage
+- Allow for requirements and design adjustments based on test feedback
+
+```mermaid
+graph LR
+    A[Write Test] --> B[Implement Feature]
+    B --> C[Run Tests]
+    C --> D[Analyze Results]
+    D --> A
+```
+
+### 7. Risk-Based Testing
+
+Prioritize testing efforts based on risk assessment:
+
+- Identify high-risk components and features early
+- Allocate more testing resources to high-risk areas
+- Create more comprehensive test suites for critical functionality
+- Use risk assessment to determine appropriate test levels (unit, integration, system)
+
+```markdown
+# Example: Risk-based test prioritization matrix
+
+| Component | Risk Level | Risk Factors | Test Priority | Test Types |
+|-----------|------------|--------------|--------------|------------|
+| Payment Processing | High | Financial data, Security, Compliance | 1 | Unit, Integration, Security, Performance |
+| User Profile | Medium | Personal data, Usability | 2 | Unit, Integration, Usability |
+| Help Documentation | Low | Content only, No data processing | 3 | Unit, Acceptance |
+```
+
+## Implementation Guidelines
+
+### Organizational Structure
+
+- Form cross-functional teams with developers, testers, and business analysts
+- Establish a testing center of excellence to maintain testing standards
+- Define clear roles and responsibilities for test creation and execution
+- Provide training on TDD practices for all team members
+
+### Tools and Infrastructure
+
+- Implement a robust continuous integration system
+- Use test automation frameworks appropriate for your technology stack
+- Set up test environments that mirror production
+- Establish test data management practices
+- Implement test reporting and metrics collection
+
+### Process Integration
+
+- Update the Waterfall process documentation to include TDD activities
+- Create templates for test-driven requirements and design documents
+- Establish entry and exit criteria for each phase based on test results
+- Define procedures for handling test failures at each phase
+
+## Common Challenges and Solutions
+
+### Challenge 1: Resistance to Change
+
+**Solution:**
+- Start with pilot projects to demonstrate value
+- Provide training and mentoring
+- Celebrate and publicize successes
+- Address concerns through open communication
+
+### Challenge 2: Increased Initial Time Investment
+
+**Solution:**
+- Adjust project timelines to account for test creation
+- Demonstrate long-term time savings through reduced defects
+- Implement TDD gradually, starting with critical components
+- Track and communicate quality metrics to show ROI
+
+### Challenge 3: Maintaining Test Suite Quality
+
+**Solution:**
+- Establish test review processes
+- Create standards for test creation and maintenance
+- Regularly refactor tests alongside code
+- Monitor test effectiveness through metrics
+
+### Challenge 4: Integration with Legacy Systems
+
+**Solution:**
+- Create characterization tests for existing functionality
+- Implement TDD for new features and changes
+- Gradually increase test coverage for legacy code
+- Use integration tests to verify system boundaries
+
+## Metrics and Measurement
+
+Track the following metrics to measure the effectiveness of Waterfall-TDD integration:
+
+- **Test coverage**: Percentage of code covered by tests
+- **Defect detection efficiency**: Percentage of defects found by tests vs. manual testing
+- **Defect escape rate**: Number of defects that escape to production
+- **Test maintenance cost**: Time spent maintaining tests
+- **Requirements traceability**: Percentage of requirements covered by tests
+- **Build stability**: Percentage of successful builds
+
+## Related Rules
+
+- [waterfall-tdd](../workflows/waterfall-tdd.mdc): Detailed workflow for Waterfall-TDD hybrid model
+- [tdd-practices](../workflows/tdd-practices.mdc): Guidelines for implementing Test-Driven Development
+- [documentation-standards](../workflows/documentation-standards.mdc): Standards for documentation in software projects
+
+## References
+
+- [Test-Driven Development: By Example](https://www.amazon.com/Test-Driven-Development-Kent-Beck/dp/0321146530) by Kent Beck
+- [Agile Testing: A Practical Guide for Testers and Agile Teams](https://www.amazon.com/Agile-Testing-Practical-Guide-Testers/dp/0321534468) by Lisa Crispin and Janet Gregory
+- [Bridging the Gap Between Waterfall and Agile](https://www.infoq.com/articles/waterfall-agile-bridge/)
+
+## Changelog
+
+- 1.0.0: Initial version 

@@ -1,1 +1,28 @@
- 
+---
+description: Guidelines for implementing clean architecture patterns in software development
+globs: **/*.{js,jsx,ts,tsx,py,java,rb,php,go,cs,c,cpp,h,hpp}
+version: 1.0.0
+author: Cursor AI
+tags: architecture, design-patterns, clean-code
+---
+
+# Clean Architecture Patterns
+
+This rule defines guidelines and best practices for implementing clean architecture in software projects, ensuring separation of concerns, testability, and maintainability.
+
+
+## Core Principles
+
+### 1. Dependency Rule
+
+- Dependencies should only point inward
+- Inner layers should not know about outer layers
+- Outer layers depend on inner layers, never the reverse
+- Use dependency inversion to maintain this rule
+
+### 2. Separation of Concerns
+
+- Divide the system into distinct layers with specific responsibilities
+- Each component should have a single responsibility
+- Minimize coupling between components
+- Maximize cohesion within components

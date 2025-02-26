@@ -1,0 +1,15 @@
+---
+description: Brief description of this rule's purpose
+globs: **/*.{ext1,ext2}
+author: Your Name
+date: YYYY-MM-DD
+---
+
+# Rule Title
+
+- First guideline or rule
+- Second guideline or rule
+- Third guideline or rule with more details:
+  - Sub-point with additional information
+  - Another sub-point with examples or clarification
+- Fourth guideline or rule

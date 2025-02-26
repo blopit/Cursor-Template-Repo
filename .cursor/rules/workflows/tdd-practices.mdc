@@ -1,0 +1,301 @@
+---
+description: Detailed guidelines for implementing Test-Driven Development practices
+globs: **/*.{js,jsx,ts,tsx,py,java,rb,php,go,cs,c,cpp,h,hpp}
+version: 1.0.0
+author: Cursor AI
+tags: workflow, tdd, testing, development-process
+---
+
+# Test-Driven Development Practices
+
+This rule provides detailed guidelines for implementing Test-Driven Development (TDD) practices in software projects, ensuring high-quality, well-tested code.
+
+## Core TDD Cycle
+
+### 1. Red: Write a Failing Test
+
+- Write a test that defines a function or improvements of a function
+- The test should fail initially, as the functionality doesn't exist yet
+- Keep tests small and focused on a single behavior
+- Write the minimum test code needed to specify the expected behavior
+
+```javascript
+// Example: Writing a failing test for a user registration function
+test('should register a new user with valid data', async () => {
+  // Arrange
+  const userData = {
+    email: 'test@example.com',
+    password: 'Password123',
+    name: 'Test User'
+  };
+  
+  // Act
+  const result = await userService.registerUser(userData);
+  
+  // Assert
+  expect(result.success).toBe(true);
+  expect(result.user).toHaveProperty('id');
+  expect(result.user.email).toBe(userData.email);
+  expect(result.user.name).toBe(userData.name);
+});
+```
+
+### 2. Green: Make the Test Pass
+
+- Write the minimum amount of code to make the test pass
+- Focus on functionality, not optimization or elegance
+- It's acceptable to write "ugly" code at this stage
+- The goal is to satisfy the test requirements, nothing more
+
+```javascript
+// Example: Implementing the minimum code to pass the test
+class UserService {
+  constructor(userRepository) {
+    this.userRepository = userRepository;
+  }
+  
+  async registerUser(userData) {
+    // Simple implementation to pass the test
+    const user = {
+      id: Date.now().toString(),
+      email: userData.email,
+      name: userData.name,
+      passwordHash: this.hashPassword(userData.password)
+    };
+    
+    await this.userRepository.save(user);
+    
+    return {
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name
+      }
+    };
+  }
+  
+  hashPassword(password) {
+    // Simple implementation for now
+    return `hashed_${password}`;
+  }
+}
+```
+
+### 3. Refactor: Improve the Code
+
+- Clean up the code while keeping the tests passing
+- Improve design, remove duplication, enhance readability
+- Apply SOLID principles and design patterns as appropriate
+- Run tests frequently during refactoring to ensure functionality is preserved
+
+```javascript
+// Example: Refactoring the implementation
+class UserService {
+  constructor(userRepository, passwordHasher) {
+    this.userRepository = userRepository;
+    this.passwordHasher = passwordHasher;
+  }
+  
+  async registerUser(userData) {
+    // Validate input
+    this.validateUserData(userData);
+    
+    // Check if user already exists
+    const existingUser = await this.userRepository.findByEmail(userData.email);
+    if (existingUser) {
+      return {
+        success: false,
+        error: 'Email already registered'
+      };
+    }
+    
+    // Create user with proper password hashing
+    const user = {
+      id: this.generateUserId(),
+      email: userData.email,
+      name: userData.name,
+      passwordHash: await this.passwordHasher.hash(userData.password),
+      createdAt: new Date()
+    };
+    
+    await this.userRepository.save(user);
+    
+    return {
+      success: true,
+      user: this.sanitizeUser(user)
+    };
+  }
+  
+  validateUserData(userData) {
+    if (!userData.email || !this.isValidEmail(userData.email)) {
+      throw new Error('Invalid email format');
+    }
+    if (!userData.password || userData.password.length < 8) {
+      throw new Error('Password must be at least 8 characters');
+    }
+    if (!userData.name) {
+      throw new Error('Name is required');
+    }
+  }
+  
+  isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+  
+  generateUserId() {
+    return crypto.randomUUID();
+  }
+  
+  sanitizeUser(user) {
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      createdAt: user.createdAt
+    };
+  }
+}
+```
+
+## TDD Best Practices
+
+### Test Structure
+
+- **Arrange-Act-Assert**: Structure tests with clear setup, action, and verification phases
+- **One Assertion Per Test**: Focus each test on verifying a single behavior
+- **Descriptive Test Names**: Use clear, descriptive names that explain the expected behavior
+- **Test Isolation**: Ensure tests are independent and don't rely on each other
+
+```javascript
+// Example: Well-structured test
+test('should return error when registering with existing email', async () => {
+  // Arrange
+  const existingUser = {
+    email: 'existing@example.com',
+    name: 'Existing User',
+    passwordHash: 'hashed_password'
+  };
+  mockUserRepository.findByEmail.mockResolvedValue(existingUser);
+  
+  const userData = {
+    email: 'existing@example.com',
+    password: 'Password123',
+    name: 'New User'
+  };
+  
+  // Act
+  const result = await userService.registerUser(userData);
+  
+  // Assert
+  expect(result.success).toBe(false);
+  expect(result.error).toBe('Email already registered');
+});
+```
+
+### Test Coverage
+
+- **Start with Happy Path**: First test the expected, successful behavior
+- **Add Edge Cases**: Then add tests for boundary conditions and edge cases
+- **Include Error Cases**: Test error handling and validation
+- **Aim for High Coverage**: Strive for high test coverage, especially in critical paths
+
+### Mocking and Test Doubles
+
+- **Use Mocks Judiciously**: Mock external dependencies, but not the system under test
+- **Prefer Explicit Dependencies**: Use dependency injection to make dependencies explicit
+- **Verify Interactions**: Verify that the system interacts correctly with dependencies
+- **Avoid Excessive Mocking**: Too many mocks can make tests brittle and less valuable
+
+```javascript
+// Example: Proper use of mocks
+test('should send welcome email after successful registration', async () => {
+  // Arrange
+  mockUserRepository.findByEmail.mockResolvedValue(null);
+  mockUserRepository.save.mockResolvedValue(true);
+  
+  const userData = {
+    email: 'new@example.com',
+    password: 'Password123',
+    name: 'New User'
+  };
+  
+  // Act
+  await userService.registerUser(userData);
+  
+  // Assert
+  expect(mockEmailService.sendWelcomeEmail).toHaveBeenCalledWith(
+    userData.email,
+    expect.objectContaining({ name: userData.name })
+  );
+});
+```
+
+## TDD Workflow Integration
+
+### Continuous Integration
+
+- Run tests automatically on every commit
+- Fail the build if tests fail
+- Track test coverage over time
+- Enforce minimum coverage thresholds
+
+### Code Review
+
+- Review tests alongside implementation code
+- Ensure tests are comprehensive and well-structured
+- Verify that tests actually test the intended behavior
+- Check for proper use of mocks and test doubles
+
+### Test Maintenance
+
+- Update tests when requirements change
+- Refactor tests to improve clarity and maintainability
+- Remove redundant or obsolete tests
+- Keep test suites fast to encourage frequent running
+
+## Common TDD Pitfalls
+
+1. **Writing Too Many Tests at Once**: Write one failing test at a time
+2. **Testing Implementation Details**: Focus on testing behavior, not implementation
+3. **Brittle Tests**: Avoid tests that break with minor implementation changes
+4. **Slow Test Suites**: Keep tests fast to maintain development velocity
+5. **Insufficient Refactoring**: Don't skip the refactoring step
+6. **Over-Mocking**: Excessive mocking leads to tests that don't verify real behavior
+
+## Language-Specific TDD Guidelines
+
+### JavaScript/TypeScript
+
+- Use Jest or Mocha for unit testing
+- Consider Cypress or Playwright for end-to-end testing
+- Use TypeScript for better type safety in tests
+- Leverage dependency injection for testability
+
+### Python
+
+- Use pytest for unit and integration testing
+- Use fixtures for test setup
+- Leverage dependency injection or monkeypatching
+- Use pytest-cov for coverage reporting
+
+### Java
+
+- Use JUnit for unit testing
+- Use Mockito for mocking
+- Consider Spring Test for integration testing
+- Use JaCoCo for coverage reporting
+
+## Related Rules
+
+- [waterfall-tdd](./waterfall-tdd.mdc): Guidelines for integrating TDD with Waterfall
+- [documentation-standards](./documentation-standards.mdc): Standards for documentation
+
+## References
+
+- [Test-Driven Development by Example](https://www.amazon.com/Test-Driven-Development-Kent-Beck/dp/0321146530) by Kent Beck
+- [Growing Object-Oriented Software, Guided by Tests](https://www.amazon.com/Growing-Object-Oriented-Software-Guided-Tests/dp/0321503627) by Steve Freeman and Nat Pryce
+
+## Changelog
+
+- 1.0.0: Initial version 

@@ -1,0 +1,305 @@
+---
+description: Standards for creating and maintaining documentation in software projects
+globs: **/*.{md,mdx,txt,rst,adoc}
+version: 1.0.0
+author: Cursor AI
+tags: workflow, documentation, standards
+---
+
+# Documentation Standards
+
+This rule defines standards for creating and maintaining documentation in software projects, ensuring clarity, completeness, and consistency across all documentation artifacts.
+
+## Documentation Types
+
+### 1. Project Documentation
+
+- **README.md**: Project overview, setup instructions, and basic usage
+- **CONTRIBUTING.md**: Guidelines for contributing to the project
+- **CHANGELOG.md**: Record of all notable changes to the project
+- **LICENSE**: Project license information
+- **CODE_OF_CONDUCT.md**: Expected behavior for project participants
+
+```markdown
+# Project Name
+
+Brief description of the project.
+
+## Features
+
+- Feature 1: Description
+- Feature 2: Description
+- Feature 3: Description
+
+## Installation
+
+```bash
+npm install project-name
+```
+
+## Quick Start
+
+```javascript
+import { feature } from 'project-name';
+
+// Example usage
+feature.doSomething();
+```
+
+## Documentation
+
+For full documentation, visit [docs.example.com](https://docs.example.com).
+
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+```
+
+### 2. Technical Documentation
+
+- **Architecture Documents**: System architecture, component diagrams, data flow
+- **API Documentation**: Endpoints, parameters, responses, authentication
+- **Database Schemas**: Entity-relationship diagrams, table definitions
+- **Development Guides**: Setup guides, coding standards, workflow processes
+
+```markdown
+# Authentication Service
+
+## Overview
+
+The Authentication Service handles user registration, login, and token management.
+
+## Architecture
+
+```mermaid
+graph TD
+    A[Client] --> B[Auth Controller]
+    B --> C[Auth Service]
+    C --> D[User Repository]
+    C --> E[Token Service]
+    D --> F[(Database)]
+```
+
+## API Endpoints
+
+### POST /api/auth/register
+
+Register a new user.
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "securePassword123",
+  "name": "John Doe"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "userId": "123e4567-e89b-12d3-a456-426614174000"
+}
+```
+
+**Status Codes:**
+- 201: User created successfully
+- 400: Invalid input
+- 409: Email already exists
+```
+
+### 3. User Documentation
+
+- **User Guides**: Step-by-step instructions for using the application
+- **FAQs**: Frequently asked questions and answers
+- **Troubleshooting Guides**: Common issues and their solutions
+- **Release Notes**: New features, improvements, and bug fixes in each release
+
+```markdown
+# User Guide: Managing Your Profile
+
+This guide explains how to update your profile information and manage your account settings.
+
+## Updating Your Profile
+
+1. Log in to your account
+2. Click on your profile picture in the top-right corner
+3. Select "Profile Settings" from the dropdown menu
+4. Update your information in the form
+5. Click "Save Changes"
+
+## Changing Your Password
+
+1. Navigate to Profile Settings as described above
+2. Click on the "Security" tab
+3. Enter your current password
+4. Enter and confirm your new password
+5. Click "Update Password"
+
+## Managing Notification Preferences
+
+1. Navigate to Profile Settings
+2. Click on the "Notifications" tab
+3. Toggle the switches for different notification types
+4. Click "Save Preferences"
+```
+
+## Documentation Structure
+
+### 1. Organization
+
+- Use a clear, hierarchical structure
+- Group related information together
+- Use consistent naming conventions
+- Provide a table of contents for longer documents
+
+### 2. Formatting
+
+- Use Markdown for most documentation
+- Follow a consistent style guide
+- Use headings, lists, and tables appropriately
+- Include code blocks with proper syntax highlighting
+
+### 3. Content
+
+- Start with a clear overview or introduction
+- Use concise, clear language
+- Include examples and use cases
+- Provide visual aids (diagrams, screenshots) when helpful
+
+## Documentation Standards by Type
+
+### 1. Code Documentation
+
+- Document all public APIs, classes, and functions
+- Include parameter descriptions, return values, and exceptions
+- Provide usage examples for complex functionality
+- Use standardized documentation formats (JSDoc, Sphinx, etc.)
+
+```javascript
+/**
+ * Registers a new user in the system.
+ * 
+ * @param {Object} userData - The user data
+ * @param {string} userData.email - The user's email address
+ * @param {string} userData.password - The user's password (min 8 characters)
+ * @param {string} userData.name - The user's full name
+ * @returns {Promise<Object>} The result object
+ * @returns {boolean} result.success - Whether the operation was successful
+ * @returns {string} [result.userId] - The ID of the created user (if successful)
+ * @returns {string} [result.error] - Error message (if unsuccessful)
+ * @throws {ValidationError} If the input data is invalid
+ * 
+ * @example
+ * // Register a new user
+ * const result = await authService.registerUser({
+ *   email: 'user@example.com',
+ *   password: 'securePass123',
+ *   name: 'John Doe'
+ * });
+ * 
+ * if (result.success) {
+ *   console.log(`User created with ID: ${result.userId}`);
+ * } else {
+ *   console.error(`Registration failed: ${result.error}`);
+ * }
+ */
+async function registerUser(userData) {
+  // Implementation...
+}
+```
+
+### 2. API Documentation
+
+- Document all endpoints, methods, and status codes
+- Include request and response formats
+- Describe authentication and authorization requirements
+- Provide example requests and responses
+
+### 3. Architecture Documentation
+
+- Include high-level system overview
+- Document component interactions and dependencies
+- Explain design decisions and trade-offs
+- Use diagrams to illustrate architecture
+
+## Documentation Maintenance
+
+### 1. Version Control
+
+- Store documentation in version control alongside code
+- Update documentation when related code changes
+- Include documentation changes in pull requests
+- Review documentation changes during code review
+
+### 2. Regular Review
+
+- Schedule regular documentation reviews
+- Verify accuracy and completeness
+- Update outdated information
+- Improve clarity and organization
+
+### 3. Feedback Loop
+
+- Provide mechanisms for users to give feedback on documentation
+- Track documentation issues and improvements
+- Prioritize fixing documentation based on user needs
+- Continuously improve based on feedback
+
+## Documentation Tools
+
+### 1. Documentation Generators
+
+- Use tools like JSDoc, Sphinx, or Swagger to generate documentation from code
+- Configure automated documentation builds
+- Integrate documentation generation into CI/CD pipelines
+
+### 2. Diagramming Tools
+
+- Use tools like Mermaid, PlantUML, or Lucidchart for diagrams
+- Include diagrams as code when possible
+- Maintain source files for diagrams
+
+### 3. Documentation Platforms
+
+- Consider using dedicated documentation platforms
+- Ensure documentation is searchable
+- Provide versioned documentation for different releases
+- Make documentation accessible to the target audience
+
+## Best Practices
+
+1. **Write Documentation Early**: Document as you code, not after
+2. **Keep It Updated**: Outdated documentation is worse than no documentation
+3. **Consider the Audience**: Write for the intended readers (developers, users, etc.)
+4. **Be Concise**: Use clear, simple language and avoid unnecessary details
+5. **Use Examples**: Provide concrete examples to illustrate concepts
+6. **Test Documentation**: Verify that instructions work as documented
+7. **Use Templates**: Create and use templates for consistency
+
+## Common Pitfalls
+
+1. **Assuming Knowledge**: Not explaining prerequisites or assuming too much knowledge
+2. **Excessive Detail**: Including too much detail that quickly becomes outdated
+3. **Poor Organization**: Making information hard to find
+4. **Inconsistent Style**: Using different formats and styles across documents
+5. **Neglecting Updates**: Letting documentation become outdated
+
+## Related Rules
+
+- [waterfall-tdd](./waterfall-tdd.mdc): Guidelines for integrating TDD with Waterfall
+- [tdd-practices](./tdd-practices.mdc): Detailed guidelines for TDD practices
+
+## References
+
+- [Google Developer Documentation Style Guide](https://developers.google.com/style)
+- [Write the Docs](https://www.writethedocs.org/): Community and resources for documentation
+
+## Changelog
+
+- 1.0.0: Initial version 

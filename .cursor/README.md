@@ -1,66 +1,79 @@
-# .cursor Directory Structure
+# Cursor Rules Documentation
 
-This directory contains all AI assistant-related files and configurations.
+This directory contains rules, templates, and tools for managing Cursor AI rules in your project.
 
 ## Directory Structure
 
 ```
 .cursor/
-├── rules/              # Core rules and configurations
-├── temp/              # Temporary files used during operations
-├── cache/             # Cache for API responses and analysis results
-├── logs/              # AI operation logs and debugging information
-├── snippets/          # Reusable code snippets and templates
-├── metrics/           # Performance and usage metrics
-├── sessions/          # Session-specific data and context
-└── workspace/         # AI workspace for file operations
+├── docs/                  # Documentation
+│   └── mdc-best-practices.md  # Best practices for creating .mdc files
+├── rules/                 # Rule files organized by category
+│   ├── core/              # Core rules
+│   ├── patterns/          # Pattern rules
+│   ├── tech/              # Technology-specific rules
+│   └── workflows/         # Workflow rules
+├── templates/             # Templates for creating new rules
+│   └── rule-template.mdc  # Template for new .mdc files
+└── tools/                 # Tools for managing rules
+    └── create-mdc-rule.sh # Script to create new rule files
 ```
 
-## Directories
+## Getting Started
 
-### rules/
-- Core rules and configurations for the AI assistant
-- Stage-specific agent configurations
-- Workflow templates and standards
+### Creating a New Rule
 
-### temp/
-- Temporary files used during operations
-- Commit message drafts
-- Intermediate processing files
-- Cleaned up automatically after use
+To create a new rule file based on the template, use the `create-mdc-rule.sh` script:
 
-### cache/
-- API response caches
-- Analysis result caches
-- Token usage tracking
-- Semantic search indices
+```bash
+.cursor/tools/create-mdc-rule.sh -c <category> -g "<glob-pattern>" <rule-name>
+```
 
-### logs/
-- Operation logs
-- Error tracking
-- Performance metrics
-- Debug information
+For example:
 
-### snippets/
-- Reusable code templates
-- Common refactoring patterns
-- Documentation templates
-- Test templates
+```bash
+.cursor/tools/create-mdc-rule.sh -c workflows -g "**/*.js,**/*.ts" tdd-workflow
+```
 
-### metrics/
-- Usage statistics
-- Performance measurements
-- Token consumption tracking
-- Success/failure rates
+This will:
+1. Create a new file at `.cursor/rules/workflows/tdd-workflow.mdc`
+2. Prompt you for a description
+3. Set up the basic structure based on the template
+4. Suggest an entry to add to your `.cursorrules` file
 
-### sessions/
-- Active session contexts
-- Conversation history
-- Task progress tracking
-- State management
+### Adding Rules to .cursorrules
 
-### workspace/
-- Temporary working directory for file operations
-- Backup copies of modified files
-- Generated code pending review
-- Test environments 
+After creating a new rule, add it to the `<available_instructions>` section in your `.cursorrules` file:
+
+```
+<available_instructions>
+tdd-workflow: Description of your TDD workflow rule
+</available_instructions>
+```
+
+### Using Rules in Cursor
+
+To use a rule in your Cursor AI conversations, reference it by name:
+
+```
+/rule tdd-workflow
+```
+
+## Best Practices
+
+For detailed guidelines on creating effective `.mdc` files, see the [Best Practices Guide](docs/mdc-best-practices.md).
+
+Key points:
+- Use clear, descriptive names for rule files
+- Organize rules into logical categories
+- Include proper metadata with glob patterns
+- Provide examples and explanations
+- Keep rules focused and specific
+
+## Customizing Templates
+
+You can customize the rule template at `.cursor/templates/rule-template.mdc` to better suit your project's needs. Consider creating multiple templates for different types of rules.
+
+## Maintenance
+
+Regularly review and update your rules to ensure they remain relevant and effective. Consider establishing a process for collecting feedback and incorporating improvements. 
