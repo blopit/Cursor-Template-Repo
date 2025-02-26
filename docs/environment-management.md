@@ -162,4 +162,52 @@ If you encounter issues with environment configuration:
 
 1. Run the validation tool to identify problems
 2. Check the application logs for specific error messages
-3. Consult the project documentation for environment requirements 
+3. Consult the project documentation for environment requirements
+
+## Contributing Environment Changes
+
+When making changes to environment configurations, follow these guidelines:
+
+### Using Git Helpers
+
+Always use the provided git helper functions for commits and PRs to ensure proper formatting and avoid issues with multi-line messages:
+
+```bash
+# Source the helper functions
+source tools/git_helpers.sh
+
+# Create a feature branch
+create_feature_branch "update-env-config"
+
+# Make your changes...
+
+# Create a commit with a multi-line message
+create_commit "Update environment configuration" "
+- Added new required variables for feature X
+- Updated validation rules for production
+- Added documentation for new variables
+"
+
+# Push the branch
+push_branch
+
+# Create a PR
+create_pr "Update environment configuration" "
+## Changes
+- Added new required variables for feature X
+- Updated validation rules for production
+- Added documentation for new variables
+
+## Testing
+- Validated in development and test environments
+- Confirmed backward compatibility
+"
+```
+
+### Checklist for Environment Changes
+
+1. **Update All Environments**: When adding a new variable, update all environment example files
+2. **Update Documentation**: Always update this document when making changes
+3. **Update Validation**: Ensure the validation logic in `env_manager.py` is updated for new requirements
+4. **Test All Environments**: Verify your changes work in all environments
+5. **Review Security**: Ensure sensitive values are properly protected 

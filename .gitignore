@@ -216,3 +216,8 @@ ENV/
 *.swp
 *.swo
 .DS_Store
+
+# Temporary files
+.commit_msg
+.pr_body
+.temp_*
