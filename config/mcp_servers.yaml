@@ -1,0 +1,120 @@
+# MCP Server Configuration
+# This file defines MCP server configurations for different environments
+
+# Default configuration that applies to all servers unless overridden
+default:
+  workers: 4
+  timeout: 30
+  ssl_enabled: false
+  log_level: "INFO"
+  middleware:
+    - SecurityMiddleware:
+        enabled: true
+    - MetricsMiddleware:
+        enabled: true
+        metrics_path: "/metrics"
+
+# Environment-specific server configurations
+environments:
+  development:
+    servers:
+      main:
+        host: "localhost"
+        port: 8000
+        workers: 2
+        ssl_enabled: false
+        log_level: "DEBUG"
+        debug: true
+        middleware:
+          - SecurityMiddleware:
+              enabled: true
+              rate_limit:
+                requests: 1000
+                period: 60
+          - MetricsMiddleware:
+              enabled: true
+              enable_timing: true
+      secondary:
+        host: "localhost"
+        port: 8001
+        workers: 1
+        ssl_enabled: false
+        debug: true
+  
+  test:
+    servers:
+      main:
+        host: "localhost"
+        port: 9000
+        workers: 1
+        timeout: 10
+        ssl_enabled: false
+        log_level: "DEBUG"
+        debug: true
+        middleware:
+          - SecurityMiddleware:
+              enabled: false
+          - MetricsMiddleware:
+              enabled: true
+              track_endpoints: true
+  
+  staging:
+    servers:
+      main:
+        host: "0.0.0.0"
+        port: 8000
+        workers: 4
+        ssl_enabled: true
+        ssl_cert: "/etc/ssl/certs/mcp-staging.crt"
+        ssl_key: "/etc/ssl/private/mcp-staging.key"
+        middleware:
+          - SecurityMiddleware:
+              enabled: true
+              rate_limit:
+                requests: 500
+                period: 60
+              allowed_hosts:
+                - "api-staging.example.com"
+          - MetricsMiddleware:
+              enabled: true
+  
+  production:
+    servers:
+      main:
+        host: "0.0.0.0"
+        port: 443
+        workers: 8
+        timeout: 30
+        ssl_enabled: true
+        ssl_cert: "/etc/ssl/certs/mcp.crt"
+        ssl_key: "/etc/ssl/private/mcp.key"
+        log_level: "WARNING"
+        middleware:
+          - SecurityMiddleware:
+              enabled: true
+              rate_limit:
+                requests: 200
+                period: 60
+              allowed_hosts:
+                - "api.example.com"
+          - MetricsMiddleware:
+              enabled: true
+      analytics:
+        host: "0.0.0.0"
+        port: 8080
+        workers: 4
+        ssl_enabled: true
+        ssl_cert: "/etc/ssl/certs/mcp-analytics.crt"
+        ssl_key: "/etc/ssl/private/mcp-analytics.key"
+        log_level: "WARNING"
+        middleware:
+          - SecurityMiddleware:
+              enabled: true
+              rate_limit:
+                requests: 500
+                period: 60
+              allowed_hosts:
+                - "analytics.example.com"
+          - MetricsMiddleware:
+              enabled: true
+              enable_timing: true 
