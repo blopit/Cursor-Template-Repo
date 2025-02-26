@@ -1,0 +1,438 @@
+---
+description: Guidelines for effective code review practices
+globs: **/*.{js,ts,jsx,tsx,py,java,kt,go,rb,php,cs,c,cpp,h,hpp,css,scss,html,md}
+version: 1.0.0
+author: Cursor AI
+tags: workflow, code-review, quality, collaboration
+---
+
+# Code Review Guidelines
+
+This document defines guidelines for conducting effective code reviews, ensuring code quality, knowledge sharing, and team collaboration.
+
+## Core Principles
+
+### 1. Purpose of Code Reviews
+
+Code reviews serve multiple important purposes:
+
+- **Quality Assurance**: Identify bugs, logic errors, and edge cases
+- **Knowledge Sharing**: Spread knowledge across the team
+- **Consistency**: Ensure adherence to coding standards and best practices
+- **Mentorship**: Provide learning opportunities for both reviewer and author
+- **Collective Ownership**: Foster shared responsibility for the codebase
+
+### 2. Review Mindset
+
+Approach code reviews with the right mindset:
+
+- **Be Respectful**: Focus on the code, not the person
+- **Be Constructive**: Suggest improvements rather than just pointing out problems
+- **Be Collaborative**: Work together to find the best solution
+- **Be Thorough**: Take the time to understand the code and its context
+- **Be Timely**: Provide feedback promptly to maintain development velocity
+
+## Code Review Process
+
+### 1. Pre-Review Checklist (Author)
+
+Before submitting code for review, ensure:
+
+- [ ] Code is complete and implements the required functionality
+- [ ] All tests pass (unit, integration, end-to-end)
+- [ ] Code follows project style guidelines and best practices
+- [ ] Self-review has been performed to catch obvious issues
+- [ ] PR/commit description clearly explains the changes and rationale
+
+```markdown
+# Example Pull Request Template
+
+## Description
+Brief description of the changes and the problem they solve.
+
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation update
+
+## How Has This Been Tested?
+Describe the tests that you ran to verify your changes.
+
+## Checklist
+- [ ] My code follows the style guidelines of this project
+- [ ] I have performed a self-review of my own code
+- [ ] I have commented my code, particularly in hard-to-understand areas
+- [ ] I have made corresponding changes to the documentation
+- [ ] My changes generate no new warnings
+- [ ] I have added tests that prove my fix is effective or that my feature works
+- [ ] New and existing unit tests pass locally with my changes
+```
+
+### 2. Review Process
+
+#### Size and Scope
+
+- Keep reviews small (ideally < 400 lines of code)
+- Focus on a single logical change per review
+- Break large changes into smaller, sequential PRs
+
+#### Review Steps
+
+1. **Understand the Context**: Read the PR description and related issues
+2. **Check Functionality**: Verify the code does what it claims to do
+3. **Review Tests**: Ensure proper test coverage and test quality
+4. **Examine Implementation**: Look for bugs, edge cases, and design issues
+5. **Check Style**: Verify adherence to coding standards
+6. **Provide Feedback**: Comment on issues and suggest improvements
+7. **Approve or Request Changes**: Based on the review findings
+
+### 3. Post-Review Process
+
+- **Author Addresses Feedback**: Make requested changes or discuss alternatives
+- **Reviewer Re-reviews**: Verify changes address the feedback
+- **Final Approval**: Approve the PR when all issues are resolved
+- **Merge**: Merge the changes into the target branch
+
+## What to Look For
+
+### 1. Functionality
+
+- Does the code correctly implement the requirements?
+- Are all edge cases handled appropriately?
+- Is there proper error handling?
+- Are there any performance concerns?
+
+### 2. Code Quality
+
+- Is the code readable and maintainable?
+- Are functions and classes appropriately sized and focused?
+- Is there any duplicated code that could be refactored?
+- Are variable and function names clear and descriptive?
+
+```javascript
+// Poor naming
+function process(d) {
+  let r = 0;
+  for (let i = 0; i < d.length; i++) {
+    r += d[i].v;
+  }
+  return r;
+}
+
+// Better naming
+function calculateTotalValue(items) {
+  let totalValue = 0;
+  for (let i = 0; i < items.length; i++) {
+    totalValue += items[i].value;
+  }
+  return totalValue;
+}
+```
+
+### 3. Architecture and Design
+
+- Does the code follow SOLID principles?
+- Is the code properly modularized?
+- Are dependencies managed appropriately?
+- Does the design align with the project's architecture?
+
+### 4. Security
+
+- Are there any potential security vulnerabilities?
+- Is sensitive data handled securely?
+- Are inputs properly validated and sanitized?
+- Are authentication and authorization implemented correctly?
+
+```javascript
+// Security issue: SQL injection vulnerability
+function getUserData(userId) {
+  const query = `SELECT * FROM users WHERE id = ${userId}`;
+  return db.execute(query);
+}
+
+// Fixed: Using parameterized query
+function getUserData(userId) {
+  const query = `SELECT * FROM users WHERE id = ?`;
+  return db.execute(query, [userId]);
+}
+```
+
+### 5. Testing
+
+- Is there adequate test coverage?
+- Do tests verify both happy paths and edge cases?
+- Are tests clear and maintainable?
+- Are mocks and test doubles used appropriately?
+
+```javascript
+// Example of a good test
+test('should calculate total price with tax', () => {
+  // Arrange
+  const items = [
+    { name: 'Item 1', price: 10 },
+    { name: 'Item 2', price: 20 }
+  ];
+  const taxRate = 0.1;
+  
+  // Act
+  const result = calculateTotalWithTax(items, taxRate);
+  
+  // Assert
+  expect(result).toBe(33); // (10 + 20) * 1.1
+});
+```
+
+### 6. Documentation
+
+- Is the code adequately documented?
+- Are complex algorithms or business rules explained?
+- Are public APIs documented?
+- Are comments up-to-date and helpful?
+
+```javascript
+/**
+ * Calculates the total price of items with tax applied.
+ * 
+ * @param {Array<Object>} items - Array of items with price property
+ * @param {number} taxRate - Tax rate as a decimal (e.g., 0.1 for 10%)
+ * @returns {number} Total price including tax
+ * @throws {Error} If taxRate is negative
+ */
+function calculateTotalWithTax(items, taxRate) {
+  if (taxRate < 0) {
+    throw new Error('Tax rate cannot be negative');
+  }
+  
+  const subtotal = items.reduce((sum, item) => sum + item.price, 0);
+  return subtotal * (1 + taxRate);
+}
+```
+
+## Providing Effective Feedback
+
+### 1. Be Specific and Actionable
+
+- Clearly identify the issue
+- Explain why it's a problem
+- Suggest a specific improvement
+
+```markdown
+// Vague feedback
+"This code could be better."
+
+// Specific and actionable feedback
+"The nested if statements on lines 45-60 make the logic hard to follow. Consider extracting this into a separate function or using early returns to reduce nesting."
+```
+
+### 2. Prioritize Feedback
+
+Categorize feedback by importance:
+
+- **Must Fix**: Bugs, security issues, or critical design flaws
+- **Should Improve**: Code quality issues that should be addressed
+- **Consider**: Suggestions that would be nice but aren't critical
+- **Nitpick**: Minor style or preference issues
+
+### 3. Ask Questions
+
+- Use questions to understand the author's intent
+- Encourage the author to think about alternatives
+- Avoid assuming you know better
+
+```markdown
+"I notice you're using a for-loop here instead of Array.map(). Was there a specific reason for this choice? Using map() might make the code more concise and functional."
+```
+
+### 4. Provide Context and Resources
+
+- Link to relevant documentation or examples
+- Explain the reasoning behind your suggestions
+- Share knowledge that might not be obvious
+
+### 5. Acknowledge Good Code
+
+- Point out well-written code and clever solutions
+- Balance criticism with positive feedback
+- Recognize improvements from previous reviews
+
+## Language-Specific Review Guidelines
+
+### JavaScript/TypeScript
+
+- Check for proper type definitions and usage
+- Look for potential null/undefined issues
+- Verify proper async/await and Promise handling
+- Check for memory leaks (especially event listeners)
+- Ensure proper error handling in async code
+
+```typescript
+// Issues to watch for
+function processData(data: any) {  // 'any' type should be avoided
+  if (data) {  // Doesn't check for empty objects/arrays
+    return data.items.map(item => item.value);  // Potential null reference
+  }
+}
+
+// Better approach
+function processData(data: { items?: Array<{ value: number }> }): number[] {
+  if (!data?.items?.length) {
+    return [];
+  }
+  
+  return data.items.map(item => item.value);
+}
+```
+
+### Python
+
+- Check for proper use of Python idioms
+- Verify exception handling
+- Look for proper use of list comprehensions vs. loops
+- Check for potential performance issues
+- Verify proper use of typing
+
+```python
+# Issues to watch for
+def process_items(items):
+  result = []
+  for item in items:
+    try:
+      result.append(item.value * 2)
+    except:  # Bare except clause
+      pass  # Silently ignoring errors
+
+# Better approach
+from typing import List, Optional
+
+def process_items(items: List[Optional[object]]) -> List[int]:
+  result = []
+  for item in items:
+    try:
+      if hasattr(item, 'value') and isinstance(item.value, (int, float)):
+        result.append(item.value * 2)
+    except AttributeError:
+      # Log the error or handle specifically
+      logger.warning(f"Item {item} has no 'value' attribute")
+  return result
+```
+
+### Java/Kotlin
+
+- Check for proper null handling
+- Verify resource cleanup (try-with-resources)
+- Look for proper exception handling
+- Check for thread safety issues
+- Verify proper use of collections
+
+## Code Review Tools and Automation
+
+### 1. Static Analysis Tools
+
+Integrate static analysis tools to automate basic checks:
+
+- Linters (ESLint, Pylint, etc.)
+- Type checkers (TypeScript, MyPy, etc.)
+- Style checkers (Prettier, Black, etc.)
+- Security scanners (SonarQube, Snyk, etc.)
+
+### 2. Automated Testing
+
+Ensure automated tests run on all PRs:
+
+- Unit tests
+- Integration tests
+- End-to-end tests
+- Performance tests (when relevant)
+
+### 3. Code Review Platforms
+
+Use features provided by code review platforms:
+
+- Inline comments
+- Suggested changes
+- Review templates
+- Automated checks
+
+## Remote and Asynchronous Reviews
+
+### 1. Written Communication
+
+- Be extra clear and detailed in written feedback
+- Provide context that might be obvious in person
+- Use code snippets and examples to illustrate points
+
+### 2. Video Reviews
+
+- Consider recording video walkthroughs for complex changes
+- Use screen sharing for interactive reviews when needed
+- Record pair programming sessions for knowledge sharing
+
+### 3. Time Zone Considerations
+
+- Be mindful of time zone differences
+- Set clear expectations for review turnaround times
+- Use asynchronous tools effectively
+
+## Code Review Metrics
+
+Track these metrics to improve the review process:
+
+- **Review turnaround time**: Time from PR submission to first review
+- **Review resolution time**: Time from PR submission to merge
+- **Review size**: Lines of code per review
+- **Defect detection rate**: Bugs found during review vs. after merge
+- **Review participation**: Distribution of reviews across the team
+
+## Common Pitfalls
+
+### 1. Nitpicking
+
+- Focus on substantive issues, not just style preferences
+- Don't let perfect be the enemy of good
+- Use automated tools for style enforcement
+
+### 2. Rubber Stamping
+
+- Avoid approving code without thorough review
+- Take the time to understand the changes
+- Don't rush reviews due to time pressure
+
+### 3. Scope Creep
+
+- Keep reviews focused on the current changes
+- Open separate issues for unrelated improvements
+- Don't block merges for unrelated issues
+
+### 4. Delayed Reviews
+
+- Prioritize reviews to maintain team velocity
+- Set aside dedicated time for reviews
+- Communicate delays if you can't review promptly
+
+## Best Practices
+
+1. **Review Often**: Frequent, small reviews are better than infrequent, large ones
+2. **Automate What You Can**: Use tools to catch basic issues
+3. **Face-to-Face for Complex Issues**: Use video calls for discussing complex feedback
+4. **Separate Style from Substance**: Focus on logic and design in manual reviews
+5. **Learn from Reviews**: Use reviews as learning opportunities
+6. **Rotate Reviewers**: Spread knowledge and perspective across the team
+7. **Review the Tests**: Tests are code too and deserve review
+
+## Related Rules
+
+- [development-workflow](./development-workflow.mdc): Development workflow guidelines
+- [error-patterns](./error-patterns.mdc): Guidelines for identifying and resolving common error patterns
+- [general-software](../general-software.mdc): General software development best practices
+
+## References
+
+- [Google's Engineering Practices Documentation](https://google.github.io/eng-practices/review/)
+- [Thoughtbot's Code Review Guide](https://github.com/thoughtbot/guides/tree/main/code-review)
+- [The Art of Readable Code](https://www.oreilly.com/library/view/the-art-of/9781449318482/) by Dustin Boswell and Trevor Foucher
+
+## Changelog
+
+- 1.0.0: Initial version 
+
