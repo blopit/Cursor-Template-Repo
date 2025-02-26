@@ -1,0 +1,49 @@
+---
+description: Next.js specific development rules and best practices
+globs: **/*.{js,jsx,ts,tsx}
+---
+
+# Next.js Development Rules
+
+## App Router Guidelines
+- Use the App Router for new projects
+- Implement Server Components by default
+- Use Client Components only when necessary (interactivity, hooks)
+- Implement proper data fetching with `fetch` and caching strategies
+- Use React Server Components for data fetching where possible
+- Implement proper error handling with error.tsx files
+- Use loading.tsx for loading states
+
+## Performance Optimization
+- Minimize 'use client' directives
+- Implement proper image optimization with next/image
+- Use dynamic imports for large components
+- Implement proper code splitting
+- Use Suspense boundaries effectively
+- Implement incremental static regeneration for semi-static data
+- Use edge functions for global performance
+
+## Routing and Navigation
+- Implement proper route grouping with folders
+- Use layout.tsx for shared layouts
+- Implement proper metadata for SEO
+- Use Link component for client-side navigation
+- Implement proper dynamic routes
+
+## State Management
+- Use React Context for global state when appropriate
+- Consider Zustand for more complex state management
+- Implement proper form handling with React Hook Form
+- Use SWR or React Query for data fetching and caching
+
+## Styling
+- Use Tailwind CSS for styling
+- Implement proper responsive design
+- Use CSS variables for theming
+- Consider CSS Modules for component-specific styling
+
+## Accessibility
+- Implement proper semantic HTML
+- Use ARIA attributes when necessary
+- Ensure keyboard navigation works properly
+- Test with screen readers

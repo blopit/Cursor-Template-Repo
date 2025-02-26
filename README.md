@@ -141,4 +141,52 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [Cursor Documentation](https://cursor.sh/docs)
 - [Python Best Practices](https://docs.python-guide.org/)
-- [Test-Driven Development Guide](https://www.agilealliance.org/glossary/tdd/) 
+- [Test-Driven Development Guide](https://www.agilealliance.org/glossary/tdd/)
+
+# Cursor Rules Structure
+
+## Recommended Structure
+```
+.cursor/
+├── rules/
+│   ├── core/                 # Fundamental system rules
+│   ├── tech/                 # Technology-specific rules
+│   │   ├── typescript/       # TypeScript specific rules
+│   │   ├── python/           # Python specific rules
+│   │   └── ...
+│   ├── workflows/            # Workflow and process rules
+│   ├── patterns/             # Common code patterns and solutions
+│   └── project/              # Project-specific rules
+└── ...
+```
+
+## Implementation Steps
+1. Move rules from `awesome-cursor-rules-mdc` to appropriate directories
+2. Ensure proper glob patterns in each MDC file
+3. Update rule references in `.cursorrules`
+
+## About Cursor Rules
+
+Cursor rules are instructions for the AI to follow when working with your codebase. They help ensure consistency, quality, and efficiency in development.
+
+### Benefits of Structured Rules
+- **Consistency**: Everyone follows the same practices
+- **Quality**: Nothing important gets forgotten
+- **Efficiency**: No need to repeat instructions for common tasks
+
+### How Rules Work
+- Rules are defined in `.mdc` files (Markdown Cursor)
+- Each rule has a description and glob patterns to match files
+- Rules can be organized by technology, workflow, or purpose
+- The AI applies rules based on priority and specificity
+
+### Using Rules
+- Reference rules in your conversations with the AI
+- The AI will automatically apply rules that match the files you're working with
+- You can create custom rules for your specific project needs
+
+## Getting Started
+To use these rules effectively:
+1. Familiarize yourself with the rule categories
+2. Reference relevant rules when working with the AI
+3. Create custom rules for your specific project needs 

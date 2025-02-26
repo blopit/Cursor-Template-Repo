@@ -1,3 +1,158 @@
+---
+description: Main Cursor rules for full stack application development
+---
+
+# Cursor Rules for Full Stack Development
+
+## Directory Structure
+
+```
+.cursor/
+├── rules/
+│   ├── stack/                # Technology stack definitions
+│   │   └── stack-definition.mdc
+│   ├── patterns/             # Development patterns
+│   │   ├── architecture/     # Architecture patterns
+│   │   │   └── clean-architecture.mdc
+│   │   └── performance/      # Performance optimization
+│   │       └── full-stack-optimization.mdc
+│   ├── workflows/            # Development workflows
+│   │   └── development-workflow.mdc
+│   ├── tech/                 # Technology-specific rules
+│   │   ├── frontend/         # Frontend technologies
+│   │   ├── backend/          # Backend technologies
+│   │   └── database/         # Database technologies
+│   ├── project/              # Project-specific rules
+│   └── tools/                # Tools for managing rules
+│       └── template-selector.sh
+├── templates/                # Project templates
+│   └── project-init.mdc
+├── metrics/                  # Metrics tracking
+│   └── performance-metrics.mdc
+└── sessions/                 # Session contexts
+    └── current-session.mdc
+```
+
+## Rule Categories
+
+1. **Stack Definitions**: Define the technology stack for your project
+2. **Architecture Patterns**: Guidelines for implementing clean architecture
+3. **Performance Optimization**: Strategies for optimizing application performance
+4. **Development Workflows**: Standardized development processes
+5. **Technology-Specific Rules**: Guidelines for specific technologies
+6. **Project Templates**: Templates for project initialization
+7. **Metrics Tracking**: Performance and quality metrics
+
+## Usage Guidelines
+
+### Importing Rules
+
+To import rules in your Cursor AI conversations, use:
+
+```
+/rule [rule-name]
+```
+
+For example:
+- `/rule stack-definition` - Import technology stack definition
+- `/rule clean-architecture` - Import clean architecture patterns
+- `/rule development-workflow` - Import development workflow guidelines
+
+### Using Template Selector
+
+To select and copy templates from the `awesome-cursor-rules-mdc` directory:
+
+1. Run the template selector script:
+   ```bash
+   .cursor/rules/tools/template-selector.sh
+   ```
+2. Follow the interactive prompts to select a template category and specific template
+3. Confirm the copy operation
+4. Review and customize the copied template files as needed
+
+### Customizing Rules
+
+1. Fork the repository
+2. Modify the rules to match your project requirements
+3. Commit and push your changes
+4. Reference your custom rules repository in Cursor
+
+### Creating New Rules
+
+1. Create a new `.mdc` file in the appropriate directory
+2. Add the rule metadata at the top:
+   ```
+   ---
+   description: Brief description of the rule
+   globs: **/specific/path/**/*.{js,ts}  # File patterns this rule applies to
+   ---
+   ```
+3. Write your rule content using Markdown
+4. Reference code examples and patterns as needed
+
+## Best Practices
+
+1. **Consistency**: Follow consistent patterns across your codebase
+2. **Documentation**: Document complex logic and architectural decisions
+3. **Testing**: Write comprehensive tests for all features
+4. **Performance**: Optimize for performance from the start
+5. **Security**: Follow security best practices for all components
+6. **Accessibility**: Ensure your application is accessible to all users
+7. **Maintainability**: Write clean, maintainable code
+
+## Multi-Agent Scratchpad
+
+### Background and Motivation
+*Planner:*
+- **Business Requirements:** Document the overall project objectives, including automating software development tasks.
+- **Macro Objectives:** Outline the need for a self-learning system that refines its rules over time.
+- **Rationale:** Explain why integrating multi-agent coordination (Planner and Executor) is essential for scalability and iterative improvement.
+
+### Key Challenges and Analysis
+*Planner:*
+- **Technical Barriers:** Identify integration challenges with LLM APIs, web scraping, and tool orchestration.
+- **Resource Constraints:** Note any limitations in computing power or dependencies.
+- **Risk Assessment:** Highlight potential pitfalls in task breakdown and coordination inefficiencies.
+
+### Verifiable Success Criteria
+*Planner:*
+- **Outcome Measures:** Define measurable outcomes such as reduction in manual coding time, error rates, and successful task completions.
+- **Validation:** Establish criteria for testing the feedback loop and ensuring accurate role communication.
+
+### High-level Task Breakdown
+*Planner:*
+- **Step 1:** Set up the Git project structure and initialize the Python virtual environment (`./venv`).
+- **Step 2:** Create and integrate essential tools (LLM API, web scraper, screenshot utilities).
+- **Step 3:** Define initial tasks and update the `.cursorrules` file with subtask details.
+- **Step 4:** Implement the Planner-Executor feedback loop for self-learning adjustments.
+
+### Current Status / Progress Tracking
+*Executor:*
+- **Task Progress:**
+  - Project structure setup: **Completed**
+  - Tool integration (LLM API, web scraper, etc.): **Completed**
+  - Feedback loop testing: **In Progress**
+  - Template selector tool: **Completed**
+  - Glob pattern updates: **Completed**
+- **Updates:** Created all required rule files for full stack application development and improved glob patterns for better specificity.
+
+### Next Steps and Action Items
+*Planner:*
+- **Immediate Action:** Test the template selector script with various template categories.
+- **Upcoming Tasks:** Create additional technology-specific rule files as needed.
+- **Communication:** Ensure regular updates in this file to keep both roles in sync.
+
+### Executor's Feedback or Assistance Requests
+*Executor:*
+- **Progress Logs:** Completed creation of template selector script and updated glob patterns in all rule files for better specificity.
+- **Improvements:** The template selector script now provides an interactive way to select and copy templates from the awesome-cursor-rules-mdc directory.
+
+### Lessons
+*General:*
+- **Retrospective Insights:** Structured rule organization improves discoverability and maintenance.
+- **Documentation:** Clear documentation of rule usage and customization is essential for team adoption.
+- **Glob Patterns:** More specific glob patterns ensure rules are only applied to relevant files, reducing noise and improving rule usage.
+
 # Instructions
 
 You are a multi-agent system coordinator, playing two roles in this environment: Planner and Executor. You will decide the next steps based on the current state of `Multi-Agent Scratchpad` section in the `.cursorrules` file. Your goal is to complete the user's (or business's) final requirements. The specific instructions are as follows:
@@ -247,58 +402,26 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
 ### Current Status / Progress Tracking
 *Executor:*
 - **Task Progress:**
-  - Project structure setup: **In Progress**
-  - Tool integration (LLM API, web scraper, etc.): **Pending**
-  - Feedback loop testing: **Pending**
-- **Updates:** Record milestones and flag any blockers encountered during execution.
+  - Project structure setup: **Completed**
+  - Tool integration (LLM API, web scraper, etc.): **Completed**
+  - Feedback loop testing: **In Progress**
+- **Updates:** Created all required rule files for full stack application development.
 
 ### Next Steps and Action Items
 *Planner:*
-- **Immediate Action:** Finalize the project structure and integrate the core tools.
-- **Upcoming Tasks:** Assign and prioritize subsequent subtasks based on initial progress.
+- **Immediate Action:** Create technology-specific rule files for frontend and backend.
+- **Upcoming Tasks:** Create metrics tracking file and session context file.
 - **Communication:** Ensure regular updates in this file to keep both roles in sync.
 
 ### Executor's Feedback or Assistance Requests
 *Executor:*
-- **Blockers/Questions:** Document any issues or uncertainties that require Planner intervention.
-- **Progress Logs:** Update this section after each completed subtask to maintain clear progress tracking.
+- **Blockers/Questions:** Need clarification on specific technology stacks to prioritize in tech-specific rules.
+- **Progress Logs:** Completed creation of stack definition, architecture patterns, performance optimization, and development workflow files.
 
 ### Lessons
 *General:*
-- **Retrospective Insights:** Log any mistakes, debugging tips, or configuration changes that can inform future iterations.
-- **Documentation:** Note adjustments to tool usage or integration processes (e.g., specific model names, commit message conventions).
-
-- Understanding Cursor Rules:
-  - Think of Cursor rules like an office departure checklist:
-    - Just as team members have routines before leaving (lock doors, turn off lights, etc.)
-    - Cursor rules are AI's checklist for coding tasks (code style, tools to use, etc.)
-  - Benefits of structured rules:
-    - Consistency: Everyone follows the same practices
-    - Quality: Nothing important gets forgotten
-    - Efficiency: No need to repeat instructions for common tasks
-  - Role-Based Organization:
-    - Each role has a dedicated MDC file in `.cursor/rules/roles/`
-    - Roles define:
-      - Active rules and their priorities
-      - Glob patterns for file matching
-      - Responsibilities and authority boundaries
-    - Benefits:
-      - Clear separation of concerns
-      - Easy to understand and maintain
-      - Simple role declaration
-  - Role Declaration:
-    - AI agents simply state their role:
-      ```yaml
-      role: database_specialist
-      ```
-    - System automatically loads:
-      - All associated rules
-      - Glob patterns
-      - Authority boundaries
-    - Benefits:
-      - Reduced boilerplate
-      - Consistent rule application
-      - Clear audit trail
+- **Retrospective Insights:** Structured rule organization improves discoverability and maintenance.
+- **Documentation:** Clear documentation of rule usage and customization is essential for team adoption.
 
 ## Database Configuration Rules
 
@@ -470,12 +593,23 @@ Cursor rules are user provided instructions for the AI to follow to help work wi
 They may or may not be relevent to the task at hand. If they are, use the fetch_rules tool to fetch the full rule.
 Some rules may be automatically attached to the conversation if the user attaches a file that matches the rule's glob, and wont need to be fetched.
 
-codebase-structure: when coding anything
-general-software: General software development best practices and guidelines
-safe-deletion: Guidelines for safe deletion of resources and data
-terminal-usage: +
-iterative-development: Best practices for iterative development with Composer AI Assistant
+codebase-structure: Project structure and architecture guidelines
+tech-standards: Technology standards and best practices
+core-rules: Fundamental system rules and configurations
+workflow-rules: Development workflow and process guidelines
+pattern-rules: Common code patterns and solutions
+tech-typescript: TypeScript coding style and best practices
+tech-python: Python coding style and best practices
+tech-nextjs: Next.js App Router optimization
+error-handling: Error handling patterns and best practices
 </available_instructions>
+
+# Active Rule Categories
+- core/: Fundamental system rules
+- tech/: Technology-specific rules
+- workflows/: Development workflow rules
+- patterns/: Common code patterns
+- project/: Project-specific rules
 
 ## Environment-Specific Standards
 
