@@ -1,1 +1,82 @@
- 
+---
+description: Guidelines for prioritizing and applying rules in the Cursor system
+globs: **/*
+version: 1.0.0
+author: Cursor AI
+tags: core, rules, priority
+---
+
+# Rule Priority Guidelines
+
+This document defines how rules should be prioritized and applied when multiple rules could apply to the same file or situation.
+
+## Priority Hierarchy
+
+Rules are prioritized in the following order (from highest to lowest priority):
+
+1. **Security Rules**: Rules related to security vulnerabilities and best practices
+2. **Performance Critical Rules**: Rules that address critical performance issues
+3. **Project-Specific Rules**: Custom rules defined for the specific project
+4. **Architecture Rules**: Rules related to architectural patterns and design
+5. **Code Quality Rules**: Rules for code quality, readability, and maintainability
+6. **Style Rules**: Rules for code formatting and style conventions
+
+## Conflict Resolution
+
+When rules conflict, follow these guidelines:
+
+1. **Higher Priority Wins**: Apply the rule with higher priority
+2. **Specificity Wins**: More specific rules override more general rules
+3. **Explicit Overrides**: Rules can explicitly declare which rules they override
+4. **Project Customization**: Project-specific configurations can override default priorities
+
+## Rule Application Process
+
+1. **Collection**: Gather all rules that match the current file or context
+2. **Filtering**: Filter out rules that are explicitly disabled for the context
+3. **Sorting**: Sort rules by priority according to the hierarchy
+4. **Application**: Apply rules in priority order, resolving conflicts as needed
+5. **Validation**: Ensure the final result is consistent and valid
+
+## Example Priority Resolution
+
+```
+File: src/components/UserProfile.tsx
+
+Matching Rules:
+- Security rule for user data handling (Priority 1)
+- React component architecture rule (Priority 4)
+- TypeScript style rule (Priority 6)
+- Project-specific naming convention rule (Priority 3)
+
+Application Order:
+1. Security rule for user data handling
+2. Project-specific naming convention rule
+3. React component architecture rule
+4. TypeScript style rule
+```
+
+## Rule Metadata
+
+Rules should include priority metadata to facilitate automatic prioritization:
+
+```
+---
+description: Example rule
+priority: 2  # Lower number = higher priority
+overrides: ["style/typescript", "quality/naming"]
+---
+```
+
+## Customizing Priorities
+
+Projects can customize rule priorities by creating a `.cursor/rules/core/priority-override.mdc` file that specifies custom priorities for specific rules or rule categories.
+
+## Related Rules
+
+- [rule-declaration](./rule-declaration.mdc): Guidelines for declaring rules
+- [active-rules](./active-rules.mdc): Guidelines for activating and deactivating rules
+
+## Changelog
+
+- 1.0.0: Initial version 

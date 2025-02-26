@@ -1,1 +1,820 @@
- 
+---
+description: Guidelines for implementing robust error handling across different programming languages and environments
+globs: **/*.{js,ts,jsx,tsx,py,java,kt,go,rb,php,cs,c,cpp}
+version: 1.0.0
+author: Cursor AI
+tags: error-handling, exceptions, reliability, robustness
+---
+
+# Error Handling Guidelines
+
+This rule defines guidelines for implementing robust error handling across different programming languages and environments, ensuring reliable and maintainable software.
+
+## Core Principles
+
+### 1. Fail Fast, Fail Visibly
+
+Detect and report errors as early as possible:
+
+- Validate inputs at system boundaries
+- Check preconditions before executing operations
+- Make errors visible and explicit
+- Don't hide or swallow exceptions without good reason
+
+```javascript
+// Good: Validate early and be explicit
+function transferMoney(fromAccount, toAccount, amount) {
+  if (!fromAccount || !toAccount) {
+    throw new InvalidAccountError('Both accounts must be specified');
+  }
+  
+  if (amount <= 0) {
+    throw new InvalidAmountError('Amount must be positive');
+  }
+  
+  if (fromAccount.balance < amount) {
+    throw new InsufficientFundsError(`Insufficient funds: ${fromAccount.balance} available`);
+  }
+  
+  // Proceed with transfer...
+}
+
+// Bad: Hidden failure
+function transferMoney(fromAccount, toAccount, amount) {
+  if (fromAccount && toAccount && amount > 0 && fromAccount.balance >= amount) {
+    // Proceed with transfer...
+    return true;
+  }
+  return false; // Silent failure with no indication of what went wrong
+}
+```
+
+### 2. Use Appropriate Error Mechanisms
+
+Choose the right error handling mechanism for the context:
+
+- Exceptions for exceptional conditions
+- Return values for expected error states
+- Error objects with rich context
+- Consider language-specific idioms
+
+```typescript
+// TypeScript: Using Result type for expected errors
+type Result<T, E = Error> = { success: true; value: T } | { success: false; error: E };
+
+function divideNumbers(a: number, b: number): Result<number, string> {
+  if (b === 0) {
+    return { success: false, error: 'Division by zero' };
+  }
+  return { success: true, value: a / b };
+}
+
+// Usage
+const result = divideNumbers(10, 2);
+if (result.success) {
+  console.log(`Result: ${result.value}`);
+} else {
+  console.error(`Error: ${result.error}`);
+}
+```
+
+```python
+# Python: Using exceptions for exceptional conditions
+def process_file(filename):
+    try:
+        with open(filename, 'r') as file:
+            return file.read()
+    except FileNotFoundError:
+        logger.error(f"File not found: {filename}")
+        raise
+    except PermissionError:
+        logger.error(f"Permission denied: {filename}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error processing file: {e}")
+        raise
+```
+
+### 3. Provide Context
+
+Include relevant information in error messages:
+
+- What operation was being performed
+- What inputs caused the error
+- What the expected behavior was
+- How to potentially fix the issue
+
+```java
+// Java: Rich exception with context
+public class DatabaseException extends Exception {
+    private final String operation;
+    private final String tableName;
+    private final String sqlState;
+    
+    public DatabaseException(String message, String operation, String tableName, String sqlState, Throwable cause) {
+        super(message, cause);
+        this.operation = operation;
+        this.tableName = tableName;
+        this.sqlState = sqlState;
+    }
+    
+    @Override
+    public String getMessage() {
+        return String.format("%s (Operation: %s, Table: %s, SQL State: %s)",
+                super.getMessage(), operation, tableName, sqlState);
+    }
+    
+    // Getters...
+}
+
+// Usage
+try {
+    // Database operation...
+} catch (SQLException e) {
+    throw new DatabaseException(
+        "Failed to insert record",
+        "INSERT",
+        "users",
+        e.getSQLState(),
+        e
+    );
+}
+```
+
+### 4. Preserve Stack Traces
+
+Maintain the original error context when wrapping or rethrowing:
+
+```javascript
+// JavaScript: Preserving stack trace
+async function fetchUserData(userId) {
+  try {
+    const response = await api.get(`/users/${userId}`);
+    return response.data;
+  } catch (error) {
+    // Wrap with additional context while preserving original error
+    const enhancedError = new Error(`Failed to fetch user data for ID ${userId}`);
+    enhancedError.cause = error; // Use Error.cause in modern JS
+    enhancedError.stack = error.stack; // Preserve stack trace
+    throw enhancedError;
+  }
+}
+```
+
+```python
+# Python: Preserving exception context
+def process_user_data(user_id):
+    try:
+        # Process data...
+    except Exception as e:
+        # Python 3 automatically preserves context with "raise from"
+        raise UserProcessingError(f"Failed to process user {user_id}") from e
+```
+
+### 5. Error Categorization
+
+Categorize errors to enable appropriate handling:
+
+- **Operational errors**: Expected errors that occur during normal operation (e.g., network timeout, invalid input)
+- **Programmer errors**: Bugs that should be fixed (e.g., null reference, type error)
+- **System errors**: Issues with the runtime environment (e.g., out of memory)
+
+```typescript
+// TypeScript: Error hierarchy
+abstract class AppError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = this.constructor.name;
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+// Operational errors
+class ValidationError extends AppError {}
+class ResourceNotFoundError extends AppError {}
+class AuthorizationError extends AppError {}
+
+// Programmer errors
+class InvariantViolationError extends AppError {}
+class UnreachableCodeError extends AppError {}
+
+// System errors
+class ResourceExhaustionError extends AppError {}
+```
+
+## Language-Specific Guidelines
+
+### JavaScript/TypeScript
+
+1. **Use custom error classes**:
+
+```javascript
+class ValidationError extends Error {
+  constructor(message, field) {
+    super(message);
+    this.name = 'ValidationError';
+    this.field = field;
+    Error.captureStackTrace(this, ValidationError);
+  }
+}
+
+// Usage
+throw new ValidationError('Invalid email format', 'email');
+```
+
+2. **Async error handling**:
+
+```javascript
+// Using async/await with try/catch
+async function fetchData() {
+  try {
+    const response = await fetch('/api/data');
+    if (!response.ok) {
+      throw new Error(`HTTP error ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    logger.error('Failed to fetch data:', error);
+    throw error; // Re-throw or handle appropriately
+  }
+}
+
+// Alternative: Promise chaining with .catch()
+function fetchData() {
+  return fetch('/api/data')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error ${response.status}`);
+      }
+      return response.json();
+    })
+    .catch(error => {
+      logger.error('Failed to fetch data:', error);
+      throw error; // Re-throw or handle appropriately
+    });
+}
+```
+
+3. **Global error handling**:
+
+```javascript
+// Browser: Global handler for uncaught exceptions
+window.addEventListener('error', (event) => {
+  logger.error('Uncaught error:', event.error);
+  showErrorNotification('An unexpected error occurred');
+  // Prevent default browser error handling
+  event.preventDefault();
+});
+
+// Node.js: Global handlers
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught exception:', error);
+  // Perform cleanup
+  process.exit(1); // Exit with error code
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled rejection at:', promise, 'reason:', reason);
+  // Optionally terminate
+  // process.exit(1);
+});
+```
+
+### Python
+
+1. **Custom exceptions**:
+
+```python
+class AppError(Exception):
+    """Base exception for all application errors."""
+    pass
+
+class ValidationError(AppError):
+    """Raised when input validation fails."""
+    def __init__(self, message, field=None):
+        super().__init__(message)
+        self.field = field
+
+# Usage
+raise ValidationError("Invalid email format", field="email")
+```
+
+2. **Context managers for resource cleanup**:
+
+```python
+class DatabaseConnection:
+    def __enter__(self):
+        self.conn = create_connection()
+        return self.conn
+        
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.conn.close()
+        # Don't suppress exceptions
+        return False
+
+# Usage
+with DatabaseConnection() as conn:
+    conn.execute("SELECT * FROM users")
+```
+
+3. **Handling multiple exceptions**:
+
+```python
+try:
+    # Risky operation
+    process_data(input_data)
+except ValueError as e:
+    # Handle value errors
+    logger.warning(f"Invalid input: {e}")
+    return {"error": "Invalid input", "details": str(e)}
+except IOError as e:
+    # Handle I/O errors
+    logger.error(f"I/O error: {e}")
+    return {"error": "System error", "details": "Failed to process data"}
+except Exception as e:
+    # Catch-all for unexpected errors
+    logger.exception(f"Unexpected error: {e}")
+    return {"error": "Internal error", "reference": generate_error_reference()}
+```
+
+### Java/Kotlin
+
+1. **Exception hierarchy**:
+
+```java
+// Java exception hierarchy
+public class AppException extends RuntimeException {
+    public AppException(String message) {
+        super(message);
+    }
+    
+    public AppException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+
+public class ValidationException extends AppException {
+    private final String field;
+    
+    public ValidationException(String message, String field) {
+        super(message);
+        this.field = field;
+    }
+    
+    public String getField() {
+        return field;
+    }
+}
+```
+
+2. **Try-with-resources**:
+
+```java
+// Java try-with-resources
+public String readFile(String path) throws IOException {
+    try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+        StringBuilder content = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            content.append(line).append("\n");
+        }
+        return content.toString();
+    }
+}
+```
+
+3. **Kotlin Result type**:
+
+```kotlin
+// Kotlin Result type
+fun divideNumbers(a: Int, b: Int): Result<Int> {
+    return if (b == 0) {
+        Result.failure(ArithmeticException("Division by zero"))
+    } else {
+        Result.success(a / b)
+    }
+}
+
+// Usage
+val result = divideNumbers(10, 2)
+result.fold(
+    onSuccess = { println("Result: $it") },
+    onFailure = { println("Error: ${it.message}") }
+)
+```
+
+## Error Handling Patterns
+
+### 1. Circuit Breaker Pattern
+
+Prevent cascading failures by failing fast when a system is under stress:
+
+```javascript
+class CircuitBreaker {
+  constructor(options = {}) {
+    this.failureThreshold = options.failureThreshold || 5;
+    this.resetTimeout = options.resetTimeout || 30000; // 30 seconds
+    this.state = 'CLOSED';
+    this.failureCount = 0;
+    this.lastFailureTime = null;
+  }
+
+  async execute(fn) {
+    if (this.state === 'OPEN') {
+      // Check if circuit should be half-open
+      const now = Date.now();
+      if (now - this.lastFailureTime >= this.resetTimeout) {
+        this.state = 'HALF-OPEN';
+      } else {
+        throw new Error('Circuit is open');
+      }
+    }
+
+    try {
+      const result = await fn();
+      this.success();
+      return result;
+    } catch (error) {
+      this.failure();
+      throw error;
+    }
+  }
+
+  success() {
+    this.failureCount = 0;
+    this.state = 'CLOSED';
+  }
+
+  failure() {
+    this.failureCount++;
+    this.lastFailureTime = Date.now();
+    
+    if (this.state === 'HALF-OPEN' || this.failureCount >= this.failureThreshold) {
+      this.state = 'OPEN';
+    }
+  }
+}
+
+// Usage
+const breaker = new CircuitBreaker();
+
+async function callExternalService() {
+  return breaker.execute(async () => {
+    const response = await fetch('https://api.example.com/data');
+    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+    return response.json();
+  });
+}
+```
+
+### 2. Retry Pattern
+
+Automatically retry operations that might fail due to transient issues:
+
+```typescript
+async function retry<T>(
+  fn: () => Promise<T>,
+  options: {
+    maxAttempts?: number;
+    delay?: number;
+    backoff?: number;
+    shouldRetry?: (error: Error) => boolean;
+  } = {}
+): Promise<T> {
+  const maxAttempts = options.maxAttempts || 3;
+  const delay = options.delay || 1000;
+  const backoff = options.backoff || 2;
+  const shouldRetry = options.shouldRetry || (() => true);
+  
+  let lastError: Error;
+  
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      
+      if (attempt === maxAttempts || !shouldRetry(error)) {
+        throw error;
+      }
+      
+      const waitTime = delay * Math.pow(backoff, attempt - 1);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+  }
+  
+  throw lastError;
+}
+
+// Usage
+async function fetchWithRetry() {
+  return retry(
+    () => fetch('https://api.example.com/data').then(res => res.json()),
+    {
+      maxAttempts: 3,
+      delay: 1000,
+      backoff: 2,
+      shouldRetry: (error) => {
+        // Only retry network errors or 5xx responses
+        return error.name === 'NetworkError' || 
+               (error.response && error.response.status >= 500);
+      }
+    }
+  );
+}
+```
+
+### 3. Fallback Pattern
+
+Provide alternative functionality when an operation fails:
+
+```javascript
+async function getDataWithFallback() {
+  try {
+    // Try primary data source
+    return await getPrimaryData();
+  } catch (error) {
+    logger.warn('Primary data source failed, using fallback', error);
+    try {
+      // Try fallback data source
+      return await getFallbackData();
+    } catch (fallbackError) {
+      logger.error('Fallback data source also failed', fallbackError);
+      // Return cached data as last resort
+      return getCachedData();
+    }
+  }
+}
+```
+
+## Error Logging and Monitoring
+
+### 1. Structured Logging
+
+Use structured logging for better searchability and analysis:
+
+```javascript
+// JavaScript structured logging
+logger.error('User authentication failed', {
+  userId: user.id,
+  attemptTime: new Date().toISOString(),
+  ipAddress: request.ip,
+  errorCode: 'AUTH_INVALID_CREDENTIALS',
+  // Don't log sensitive data like passwords
+});
+```
+
+### 2. Error Severity Levels
+
+Use appropriate severity levels for different types of errors:
+
+- **DEBUG**: Detailed information for debugging
+- **INFO**: Confirmation that things are working as expected
+- **WARNING**: Something unexpected happened, but the application can continue
+- **ERROR**: Something failed, but the application can still function
+- **CRITICAL**: The application cannot continue functioning
+
+```python
+# Python logging with severity levels
+import logging
+
+logger = logging.getLogger(__name__)
+
+def process_order(order):
+    try:
+        # Process order...
+        logger.info("Order processed successfully", extra={"order_id": order.id})
+    except ValidationError as e:
+        logger.warning(f"Order validation failed: {e}", extra={
+            "order_id": order.id,
+            "field": e.field
+        })
+    except PaymentError as e:
+        logger.error(f"Payment processing failed: {e}", extra={
+            "order_id": order.id,
+            "payment_method": order.payment_method
+        })
+    except Exception as e:
+        logger.critical(f"Unexpected error processing order: {e}", extra={
+            "order_id": order.id
+        }, exc_info=True)
+```
+
+### 3. Error Aggregation
+
+Aggregate similar errors to avoid log flooding:
+
+```javascript
+// Error aggregation example
+class ErrorAggregator {
+  constructor() {
+    this.errorCounts = new Map();
+    this.logThreshold = 5;
+    this.timeWindow = 60000; // 1 minute
+  }
+  
+  logError(error, context = {}) {
+    const errorKey = `${error.name}:${error.message}`;
+    
+    if (!this.errorCounts.has(errorKey)) {
+      this.errorCounts.set(errorKey, {
+        count: 1,
+        firstSeen: Date.now(),
+        lastSeen: Date.now(),
+        contexts: [context]
+      });
+      
+      // Log the first occurrence immediately
+      logger.error(error.message, { error, context });
+      return;
+    }
+    
+    const entry = this.errorCounts.get(errorKey);
+    entry.count++;
+    entry.lastSeen = Date.now();
+    
+    // Only store a limited number of contexts
+    if (entry.contexts.length < 10) {
+      entry.contexts.push(context);
+    }
+    
+    // Log if we've hit the threshold or it's been a while
+    if (entry.count % this.logThreshold === 0 || 
+        entry.lastSeen - entry.firstSeen >= this.timeWindow) {
+      logger.error(`${error.message} (occurred ${entry.count} times)`, {
+        error,
+        occurrences: entry.count,
+        firstSeen: new Date(entry.firstSeen).toISOString(),
+        lastSeen: new Date(entry.lastSeen).toISOString(),
+        sampleContexts: entry.contexts
+      });
+      
+      // Reset for the next time window
+      if (entry.lastSeen - entry.firstSeen >= this.timeWindow) {
+        this.errorCounts.set(errorKey, {
+          count: 0,
+          firstSeen: Date.now(),
+          lastSeen: Date.now(),
+          contexts: []
+        });
+      }
+    }
+  }
+}
+```
+
+## Error Handling in Different Contexts
+
+### 1. API Error Responses
+
+Return consistent error responses from APIs:
+
+```javascript
+// Express.js error handling middleware
+app.use((err, req, res, next) => {
+  // Log the error
+  logger.error('API error:', err);
+  
+  // Determine status code
+  let statusCode = 500;
+  if (err instanceof ValidationError) statusCode = 400;
+  if (err instanceof AuthorizationError) statusCode = 403;
+  if (err instanceof ResourceNotFoundError) statusCode = 404;
+  
+  // Create error response
+  const errorResponse = {
+    status: 'error',
+    code: err.code || 'INTERNAL_ERROR',
+    message: statusCode === 500 ? 'Internal server error' : err.message,
+    // Include details for non-500 errors
+    ...(statusCode !== 500 && err.details ? { details: err.details } : {}),
+    // Include reference ID for tracking
+    referenceId: generateErrorId()
+  };
+  
+  // Send response
+  res.status(statusCode).json(errorResponse);
+});
+```
+
+### 2. UI Error Handling
+
+Handle errors gracefully in user interfaces:
+
+```jsx
+// React error boundary
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    // Log the error
+    logger.error('UI error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="error-container">
+          <h2>Something went wrong</h2>
+          <p>We're sorry, but we couldn't display this content.</p>
+          <button onClick={() => this.setState({ hasError: false })}>
+            Try again
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+// Usage
+function App() {
+  return (
+    <div className="app">
+      <Header />
+      <ErrorBoundary>
+        <MainContent />
+      </ErrorBoundary>
+      <Footer />
+    </div>
+  );
+}
+```
+
+### 3. Background Jobs
+
+Handle errors in background processing:
+
+```javascript
+// Node.js worker with error handling
+async function processJob(job) {
+  try {
+    // Process the job...
+    await doWork(job.data);
+    return { success: true };
+  } catch (error) {
+    // Log the error
+    logger.error(`Error processing job ${job.id}:`, error);
+    
+    // Determine if job should be retried
+    if (isTransientError(error) && job.attempts < job.maxAttempts) {
+      const backoff = Math.pow(2, job.attempts) * 1000; // Exponential backoff
+      return {
+        success: false,
+        retry: true,
+        backoff
+      };
+    }
+    
+    // Job failed permanently
+    await notifyJobFailure(job, error);
+    return {
+      success: false,
+      retry: false
+    };
+  }
+}
+```
+
+## Common Pitfalls
+
+1. **Swallowing exceptions**: Catching exceptions without proper handling or logging
+2. **Overly broad catch blocks**: Catching `Exception` or `Error` without specific handling
+3. **Insufficient context**: Error messages that don't provide enough information to diagnose
+4. **Inconsistent error responses**: Different formats or status codes for similar errors
+5. **Exposing sensitive information**: Including stack traces or sensitive data in error responses
+6. **Ignoring cleanup**: Not releasing resources in error cases
+7. **Missing error boundaries**: Not containing errors to prevent entire application crashes
+
+## Best Practices
+
+1. **Design for failure**: Assume operations will fail and design accordingly
+2. **Be specific**: Use specific error types and messages
+3. **Centralize error handling**: Use middleware, interceptors, or global handlers
+4. **Log appropriately**: Include context but avoid sensitive information
+5. **Fail gracefully**: Provide fallbacks and graceful degradation
+6. **Test error paths**: Write tests specifically for error conditions
+7. **Document error responses**: Include error responses in API documentation
+
+## Related Rules
+
+- [clean-architecture](./architecture/clean-architecture.mdc): Guidelines for implementing clean architecture
+- [full-stack-optimization](./performance/full-stack-optimization.mdc): Guidelines for optimizing full-stack applications
+
+## References
+
+- [Error Handling Patterns](https://www.slideshare.net/ufried/patterns-of-resilience)
+- [Node.js Error Handling Practices](https://www.joyent.com/node-js/production/design/errors)
+- [Python Exception Handling Best Practices](https://docs.python-guide.org/writing/structure/#error-handling)
+
+## Changelog
+
+- 1.0.0: Initial version 
