@@ -5,6 +5,7 @@ from typing import Dict, Any, Optional
 from datetime import datetime
 import aiohttp
 import json
+import time
 
 # Mock classes for testing
 class MCPServer:
@@ -192,12 +193,13 @@ async def test_server_performance(server: MCPServer):
     metrics = MetricsMiddleware()
     server.add_middleware(metrics)
     
-    # Simulate requests
-    for _ in range(5):
-        metrics.metrics[datetime.utcnow().isoformat()] = {
+    # Simulate requests with unique timestamps to avoid overwriting
+    for i in range(5):
+        metrics.metrics[f"2025-02-26T07:14:46.{495647+i}"] = {
             "response_time": 0.1,
             "status_code": 200
         }
+        time.sleep(0.001)  # Ensure unique timestamps
     
     assert len(metrics.metrics) == 5
     assert all(isinstance(m["response_time"], float) for m in metrics.metrics.values())
