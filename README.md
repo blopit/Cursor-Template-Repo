@@ -1,15 +1,16 @@
-# Cursor-Template
+# Design-to-Deployment with Cursor
 
-A comprehensive template for Git projects that use [Cursor](https://cursor.sh/), the AI-first IDE. This template provides a structured foundation for developing projects with Cursor, including AI-assisted development workflows, maintenance scripts, and best practices.
+A comprehensive framework for transforming design files into deployed applications using Cursor AI. This framework provides a structured workflow for importing designs, generating components, integrating them into pages, validating against design specifications, and deploying to various platforms.
 
 ## 🎯 Purpose
 
-This template helps you:
-- Set up a well-organized project structure for AI-assisted development
-- Implement best practices for code quality and maintenance
-- Automate common development tasks
-- Maintain consistent coding standards
-- Track and optimize AI token usage
+This framework helps you:
+- Automate the conversion of design files (Figma, Sketch) into production-ready code
+- Maintain design fidelity throughout the development process
+- Generate consistent components based on design tokens
+- Validate implementations against design specifications
+- Streamline the deployment process to multiple platforms
+- Leverage AI for code generation and visual validation
 
 ## 📁 Project Structure
 
@@ -17,32 +18,51 @@ This template helps you:
 .
 ├── .cursor/                    # Cursor-specific configurations
 │   ├── rules/                 # Development rules and guidelines
-│   ├── metrics/              # AI usage metrics
-│   └── logs/                 # Operation logs
-├── scripts/                   # Maintenance and utility scripts
-│   ├── daily/               # Daily maintenance tasks
-│   ├── weekly/             # Weekly code quality checks
-│   ├── monthly/            # Monthly security audits
-│   └── quarterly/          # Quarterly performance analysis
-├── tests/                    # Test files
-├── tools/                    # Development tools and utilities
-├── .env.example             # Environment variables template
-├── .gitignore              # Git ignore rules
-└── requirements.txt        # Python dependencies
+│   ├── logs/                 # Operation logs
+│   ├── temp/                 # Temporary files
+│   ├── workflows/            # Workflow records and reports
+│   └── deployments/          # Deployment records
+├── designs/                   # Design files and extracted assets
+│   ├── figma/                # Figma design files
+│   ├── sketch/               # Sketch design files
+│   ├── tokens/               # Design tokens (colors, typography, etc.)
+│   ├── components/           # Component specifications
+│   └── screens/              # Screen layouts and compositions
+├── src/                       # Source code
+│   ├── components/           # Generated components
+│   ├── pages/                # Integrated pages
+│   ├── styles/               # Generated stylesheets
+│   └── utils/                # Utility functions
+├── tools/                     # Workflow tools
+│   ├── design_importer.py    # Import designs from Figma/Sketch
+│   ├── design_analyzer.py    # Analyze design files and extract tokens
+│   ├── component_generator.py # Generate components from design tokens
+│   ├── integration_generator.py # Integrate components into pages
+│   ├── visual_validator.py   # Validate implementation against design
+│   ├── deployment_prep.py    # Prepare for deployment
+│   ├── deployment_automation.py # Automate deployment to various platforms
+│   └── workflow_orchestrator.py # Orchestrate the entire workflow
+├── validation/                # Validation results
+│   └── visual/               # Visual validation reports
+├── build/                     # Build output
+├── tests/                     # Test files
+├── .env.example              # Environment variables template
+├── .gitignore                # Git ignore rules
+└── requirements.txt          # Python dependencies
 ```
 
 ## 🚀 Getting Started
 
-1. **Use this template**
+1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/Cursor-Template.git your-project
-   cd your-project
+   git clone https://github.com/yourusername/design-to-deployment.git
+   cd design-to-deployment
    ```
 
 2. **Set up Python environment**
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # or `venv\Scripts\activate` on Windows
+   python -m venv .venv
+   source .venv/bin/activate  # or `.venv\Scripts\activate` on Windows
    pip install -r requirements.txt
    ```
 
@@ -52,62 +72,124 @@ This template helps you:
    # Edit .env with your API keys and configurations
    ```
 
-## 🛠️ Maintenance Scripts
+4. **Add design files**
+   - Place Figma exports in `designs/figma/`
+   - Place Sketch exports in `designs/sketch/`
 
-### Daily Checks
-- `scripts/daily/check_dependencies.py`: Monitors package dependencies
+5. **Run the workflow**
+   ```bash
+   python tools/workflow_orchestrator.py
+   ```
+
+## 🛠️ Workflow Tools
+
+### Design Import
+- `tools/design_importer.py`: Imports designs from Figma or Sketch
   ```bash
-  ./scripts/daily/check_dependencies.py
+  python tools/design_importer.py --source designs/figma --output-dir designs/imported
   ```
 
-### Weekly Checks
-- `scripts/weekly/code_quality_check.py`: Analyzes code quality
+### Design Analysis
+- `tools/design_analyzer.py`: Analyzes design files and extracts tokens
   ```bash
-  ./scripts/weekly/code_quality_check.py
+  python tools/design_analyzer.py --input-dir designs/imported --output-dir designs/analyzed
   ```
 
-### Monthly Checks
-- `scripts/monthly/security_audit.py`: Performs security audits
+### Component Generation
+- `tools/component_generator.py`: Generates components from design tokens
   ```bash
-  ./scripts/monthly/security_audit.py
+  python tools/component_generator.py --input-dir designs/analyzed --output-dir src/components --framework react
   ```
 
-### Quarterly Checks
-- `scripts/quarterly/performance_analysis.py`: Analyzes system performance
+### Integration
+- `tools/integration_generator.py`: Integrates components into pages
   ```bash
-  ./scripts/quarterly/performance_analysis.py
+  python tools/integration_generator.py --components-dir src/components --screens-dir designs/analyzed/screens --output-dir src/pages
   ```
 
-## 📋 Development Guidelines
+### Visual Validation
+- `tools/visual_validator.py`: Validates implementation against design
+  ```bash
+  python tools/visual_validator.py --design-dir designs/imported --implementation-url http://localhost:3000 --output-dir validation/visual
+  ```
 
-### Test-Driven Development
-This template follows TDD practices:
-1. Write tests first
-2. Implement minimal code to pass tests
-3. Refactor while maintaining test coverage
+### Deployment Preparation
+- `tools/deployment_prep.py`: Prepares for deployment
+  ```bash
+  python tools/deployment_prep.py --env production --build-dir build
+  ```
 
-### Code Quality Standards
-- Maintain test coverage above 80%
-- Follow PEP 8 style guidelines
-- Document all public APIs
-- Use type hints
+### Deployment Automation
+- `tools/deployment_automation.py`: Automates deployment to various platforms
+  ```bash
+  python tools/deployment_automation.py --target vercel --env production --build-dir build
+  ```
 
-### AI-Assisted Development
-- Utilize Cursor's AI capabilities for:
-  - Code generation
-  - Refactoring
-  - Documentation
-  - Testing
-- Track token usage and costs
-- Follow AI-specific best practices
+### Workflow Orchestration
+- `tools/workflow_orchestrator.py`: Orchestrates the entire workflow
+  ```bash
+  python tools/workflow_orchestrator.py --config workflow_config.json
+  ```
 
-## 🔍 Quality Gates
+## 📋 Workflow Configuration
 
-- All tests must pass
-- Code coverage >= 80%
-- No security vulnerabilities
-- All dependencies up to date
-- Documentation complete
+The workflow can be configured using a JSON file:
+
+```json
+{
+  "workflow": {
+    "name": "Design to Deployment",
+    "description": "Transform design files into deployed applications",
+    "version": "1.0.0"
+  },
+  "steps": [
+    {
+      "name": "design_import",
+      "tool": "design_importer.py",
+      "enabled": true,
+      "params": {
+        "source": "designs/figma",
+        "output_dir": "designs/imported"
+      }
+    },
+    // Additional steps...
+  ],
+  "settings": {
+    "continue_on_error": false,
+    "parallel_execution": false,
+    "notification_email": "user@example.com",
+    "save_artifacts": true
+  }
+}
+```
+
+## 🔍 Supported Frameworks
+
+The component generator supports multiple frontend frameworks:
+
+- React (default)
+- Vue.js
+- Angular
+- Svelte
+
+Example:
+```bash
+python tools/component_generator.py --framework vue
+```
+
+## 🚢 Deployment Targets
+
+The deployment automation supports multiple targets:
+
+- Vercel (default)
+- Netlify
+- AWS
+- Custom servers
+
+Example:
+```bash
+python tools/deployment_automation.py --target netlify
+```
 
 ## 🤝 Contributing
 
@@ -135,10 +217,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Cursor](https://cursor.sh/) - The AI-first IDE
 - OpenAI - For GPT models
 - Anthropic - For Claude models
-- Contributors to the maintenance scripts and tools
+- Figma and Sketch - For design tools integration
 
 ## 🔗 Useful Links
 
 - [Cursor Documentation](https://cursor.sh/docs)
-- [Python Best Practices](https://docs.python-guide.org/)
-- [Test-Driven Development Guide](https://www.agilealliance.org/glossary/tdd/) 
+- [Figma API Documentation](https://www.figma.com/developers/api)
+- [Sketch API Documentation](https://developer.sketch.com/reference/api/)
+- [Vercel Documentation](https://vercel.com/docs)
+- [Netlify Documentation](https://docs.netlify.com/) 

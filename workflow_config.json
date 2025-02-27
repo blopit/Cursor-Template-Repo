@@ -1,0 +1,82 @@
+{
+  "workflow": {
+    "name": "Design to Deployment",
+    "description": "Transform design files into deployed applications",
+    "version": "1.0.0"
+  },
+  "steps": [
+    {
+      "name": "design_import",
+      "tool": "design_importer.py",
+      "enabled": true,
+      "params": {
+        "source": "designs/figma",
+        "output_dir": "designs/imported"
+      }
+    },
+    {
+      "name": "design_analysis",
+      "tool": "design_analyzer.py",
+      "enabled": true,
+      "params": {
+        "input_dir": "designs/imported",
+        "output_dir": "designs/analyzed"
+      }
+    },
+    {
+      "name": "component_generation",
+      "tool": "component_generator.py",
+      "enabled": true,
+      "params": {
+        "input_dir": "designs/analyzed",
+        "output_dir": "src/components",
+        "framework": "react"
+      }
+    },
+    {
+      "name": "integration",
+      "tool": "integration_generator.py",
+      "enabled": true,
+      "params": {
+        "components_dir": "src/components",
+        "screens_dir": "designs/analyzed/screens",
+        "output_dir": "src/pages"
+      }
+    },
+    {
+      "name": "visual_validation",
+      "tool": "visual_validator.py",
+      "enabled": true,
+      "params": {
+        "design_dir": "designs/imported",
+        "implementation_url": "http://localhost:3000",
+        "output_dir": "validation/visual"
+      }
+    },
+    {
+      "name": "deployment_preparation",
+      "tool": "deployment_prep.py",
+      "enabled": true,
+      "params": {
+        "env": "production",
+        "build_dir": "build"
+      }
+    },
+    {
+      "name": "deployment",
+      "tool": "deployment_automation.py",
+      "enabled": true,
+      "params": {
+        "target": "vercel",
+        "env": "production",
+        "build_dir": "build"
+      }
+    }
+  ],
+  "settings": {
+    "continue_on_error": false,
+    "parallel_execution": false,
+    "notification_email": "user@example.com",
+    "save_artifacts": true
+  }
+} 
