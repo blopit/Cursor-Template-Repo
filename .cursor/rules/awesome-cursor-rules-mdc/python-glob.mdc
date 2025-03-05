@@ -1,6 +1,6 @@
 ---
 description: Rules and best practices for Python development in the project
-globs: *.*
+globs: "**/*.py"
 ---
 
 # Python Development Rules

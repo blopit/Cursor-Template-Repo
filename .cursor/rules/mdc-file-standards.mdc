@@ -1,7 +1,6 @@
 ---
 description: Standards and requirements for creating and maintaining Markdown Cursor (.mdc) files
-globs: .cursor/rules/**/*.mdc
-alwaysApply: true
+globs: ".cursor/rules/**/*.mdc"
 ---
 
 # MDC File Standards

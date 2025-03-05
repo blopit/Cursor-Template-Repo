@@ -1,6 +1,6 @@
 ---
 description: Rules and best practices for TypeScript development in the project
-globs: *.*
+globs: "**/*.{ts,tsx}"
 ---
 
 # TypeScript Development Rules

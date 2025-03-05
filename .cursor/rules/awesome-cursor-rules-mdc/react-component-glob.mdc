@@ -1,6 +1,6 @@
 ---
 description: Rules and best practices for React components in the project
-globs: *.*
+globs: "**/*.{jsx,tsx}"
 ---
 
 # React Component Rules

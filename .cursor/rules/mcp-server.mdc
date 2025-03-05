@@ -1,7 +1,6 @@
 ---
 description: Guidelines for configuring, deploying, and maintaining the MCP Server component.
-globs: *.*
-alwaysApply: false
+globs: "**/server/**/*.{js,ts}"
 ---
 
 # MCP Server Guidelines
