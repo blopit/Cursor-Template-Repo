@@ -300,4 +300,4 @@ Optimize queries for performance:
 - Hash sensitive data (passwords) before storing
 - Consider encrypting personally identifiable information
 - Implement row-level security for multi-tenant applications
-- Regularly audit database access 
+- Regularly audit database access

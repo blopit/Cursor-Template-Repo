@@ -195,4 +195,4 @@ export const securityMiddleware = (app) => {
 4. **Isolation**: Keep environments completely isolated from each other
 5. **Consistency**: Use the same configuration approach across all services
 6. **Monitoring**: Log and alert on configuration issues
-7. **Automation**: Automate environment setup and configuration 
+7. **Automation**: Automate environment setup and configuration
