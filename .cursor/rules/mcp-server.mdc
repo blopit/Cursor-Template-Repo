@@ -1,6 +1,7 @@
 ---
 description: Guidelines for configuring, deploying, and maintaining the MCP Server component.
 globs: *.*
+alwaysApply: false
 ---
 
 # MCP Server Guidelines
