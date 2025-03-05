@@ -1,0 +1,96 @@
+#!/bin/bash
+
+# Pre-commit hook to enforce MDC documentation requirements
+# Place this file in .git/hooks/pre-commit and make it executable
+
+echo "Running pre-commit hook to check for MDC documentation..."
+
+# Get list of staged files
+staged_files=$(git diff --cached --name-only --diff-filter=ACM)
+
+# Directories to check
+src_dirs=("src" "app" "components" "pages" "utils" "lib" "tools")
+
+# File extensions to check
+extensions=("js" "jsx" "ts" "tsx" "py" "css" "scss")
+
+# Exceptions
+exceptions=("test.js" "test.jsx" "test.ts" "test.tsx" "spec.js" "spec.jsx" "spec.ts" "spec.tsx" ".config.js" ".eslintrc.js" ".prettierrc.js")
+
+# Flag to track if any files are missing MDC documentation
+missing_mdc=0
+
+# Check each staged file
+for file in $staged_files; do
+    # Skip if file doesn't exist (e.g., deleted)
+    [ ! -f "$file" ] && continue
+    
+    # Check if file is in a relevant directory
+    in_src_dir=0
+    for dir in "${src_dirs[@]}"; do
+        if [[ "$file" == $dir/* ]]; then
+            in_src_dir=1
+            break
+        fi
+    done
+    
+    # Skip if not in a relevant directory
+    [ $in_src_dir -eq 0 ] && continue
+    
+    # Check if file has a relevant extension
+    has_relevant_ext=0
+    for ext in "${extensions[@]}"; do
+        if [[ "$file" == *.$ext ]]; then
+            has_relevant_ext=1
+            break
+        fi
+    done
+    
+    # Skip if not a relevant extension
+    [ $has_relevant_ext -eq 0 ] && continue
+    
+    # Check if file is an exception
+    is_exception=0
+    for exc in "${exceptions[@]}"; do
+        if [[ "$file" == *$exc ]]; then
+            is_exception=1
+            break
+        fi
+    done
+    
+    # Skip if it's an exception
+    [ $is_exception -eq 1 ] && continue
+    
+    # Check if file contains a reference to an MDC file
+    if ! grep -q "Documentation: .cursor/rules" "$file"; then
+        echo "❌ Missing MDC documentation reference in $file"
+        echo "   Add a comment like: // Documentation: .cursor/rules/path/to/file.mdc"
+        missing_mdc=1
+    else
+        # Extract the MDC path
+        mdc_path=$(grep -o "Documentation: .cursor/rules[^ ]*" "$file" | sed 's/Documentation: //')
+        
+        # Check if the MDC file exists
+        if [ ! -f "$mdc_path" ]; then
+            echo "❌ Referenced MDC file does not exist: $mdc_path"
+            echo "   Create the MDC file or use tools/create_file.py to generate both files"
+            missing_mdc=1
+        else
+            echo "✅ MDC documentation found for $file"
+        fi
+    fi
+done
+
+# If any files are missing MDC documentation, abort the commit
+if [ $missing_mdc -eq 1 ]; then
+    echo ""
+    echo "Commit aborted due to missing MDC documentation."
+    echo "Please create the required MDC files using tools/create_file.py"
+    echo "or add them manually following the template in .cursor/rules/file-creation-standards.mdc"
+    echo ""
+    echo "To bypass this check (not recommended), use --no-verify:"
+    echo "git commit --no-verify"
+    exit 1
+fi
+
+exit 0 
