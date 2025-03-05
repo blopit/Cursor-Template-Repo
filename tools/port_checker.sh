@@ -2,6 +2,7 @@
 
 # Port Checker Utility
 # This script checks if commonly used development ports are available
+# Documentation: .cursor/rules/tools/port-checker.mdc
 
 echo "Checking port availability for development..."
 
