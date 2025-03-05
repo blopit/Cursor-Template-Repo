@@ -1,0 +1,20 @@
+# package-lock Guidelines
+
+## Purpose
+[Describe the purpose of the file]
+
+## Usage Guidelines
+[Explain how to use the code in this file]
+
+## Dependencies
+[List dependencies]
+
+## Best Practices
+- [Best practice 1]
+- [Best practice 2]
+- [Best practice 3]
+
+## Examples
+```json
+[Example code]
+```
