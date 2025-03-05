@@ -1,5 +1,6 @@
 /**
  * Test file to verify pre-commit hook
+ * Documentation: .cursor/rules/javascript/test-file.mdc
  */
 
 function testFunction() {
