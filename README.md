@@ -225,4 +225,107 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Figma API Documentation](https://www.figma.com/developers/api)
 - [Sketch API Documentation](https://developer.sketch.com/reference/api/)
 - [Vercel Documentation](https://vercel.com/docs)
-- [Netlify Documentation](https://docs.netlify.com/) 
+- [Netlify Documentation](https://docs.netlify.com/)
+
+# Environment Configuration Best Practices
+
+This repository demonstrates best practices for environment configuration in Express.js applications.
+
+## Overview
+
+Proper environment configuration is crucial for application security, maintainability, and deployment flexibility. This repository provides:
+
+1. Standardized environment file structure
+2. Environment variable validation
+3. Environment setup tools
+4. Documentation of best practices
+
+## Files
+
+- `.env.example`: Template file with placeholder values (committed to version control)
+- `.env.dev`: Development environment configuration (not committed to version control)
+- `.env.test`: Testing environment configuration (not committed to version control)
+- `.env.production`: Production environment configuration (not committed to version control)
+- `.env.md`: Documentation of environment variables and their usage
+- `tools/validate-env.js`: Script to validate environment variables
+- `tools/setup-env.js`: Script to help developers set up their environment files
+
+## Getting Started
+
+1. Clone the repository
+2. Run the setup script to create your environment file:
+
+```bash
+node tools/setup-env.js
+```
+
+3. Validate your environment configuration:
+
+```bash
+node tools/validate-env.js
+```
+
+## Best Practices
+
+1. **Never commit sensitive information** to version control
+2. **Use environment-specific files** for different environments
+3. **Standardize naming conventions** (use uppercase for all variables)
+4. **Group related variables** with comments
+5. **Document all variables** in `.env.md`
+6. **Validate environment variables** on application startup
+7. **Use a single format** for connection strings (e.g., URL format for database and Redis)
+8. **Provide clear examples** in the `.env.example` file
+9. **Rotate API keys** regularly for security
+10. **Use placeholder values** in example files
+
+## Environment Types
+
+### Development (dev)
+
+- Local development environment
+- Debug mode enabled
+- Detailed logging
+- Local database and services
+
+### Testing (test)
+
+- Automated testing environment
+- Isolated test database
+- Mock external services when possible
+- Debug mode enabled
+
+### Production (prod)
+
+- Live environment
+- Debug mode disabled
+- Minimal logging (warnings and errors only)
+- Strict security settings
+- Real external services
+
+## Documentation
+
+For detailed documentation of environment variables and their usage, see [.env.md](.env.md).
+
+## Tools
+
+### Environment Setup Script
+
+The `tools/setup-env.js` script helps developers set up their environment files correctly. It:
+
+- Creates environment files based on `.env.example`
+- Sets environment-specific values
+- Prompts for sensitive information
+- Organizes variables by category
+
+### Environment Validation Script
+
+The `tools/validate-env.js` script validates that all required environment variables are set and follows best practices. It:
+
+- Checks for missing required variables
+- Validates naming conventions
+- Detects potentially sensitive information
+- Provides a validation summary
+
+## License
+
+MIT 
