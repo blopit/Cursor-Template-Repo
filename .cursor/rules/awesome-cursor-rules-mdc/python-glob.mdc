@@ -1,0 +1,224 @@
+---
+description: Rules and best practices for Python development in the project
+globs: "**/*.py"
+---
+
+# Python Development Rules
+
+## Purpose
+This file defines rules and best practices for Python development in the project. It ensures consistent code style, proper documentation, and adherence to Python best practices across all Python files.
+
+## Glob Patterns
+- `**/*.py`
+- `src/**/*.py`
+- `tests/**/*.py`
+- `scripts/**/*.py`
+
+## Rules
+
+### Code Style
+- Follow PEP 8 style guide for all Python code
+- Maximum line length of 88 characters (Black formatter default)
+- Use 4 spaces for indentation, not tabs
+- Use snake_case for variables, functions, and modules
+- Use PascalCase for classes
+- Use UPPER_CASE for constants
+- Add a blank line at the end of each file
+
+### Documentation
+- Include docstrings for all modules, classes, and functions
+- Use Google-style docstrings format
+- Document parameters, return values, and exceptions
+- Include type hints for function parameters and return values
+- Add comments for complex or non-obvious code sections
+
+### Imports
+- Group imports in the following order:
+  1. Standard library imports
+  2. Third-party library imports
+  3. Local application imports
+- Sort imports alphabetically within each group
+- Use absolute imports rather than relative imports when possible
+- Avoid wildcard imports (`from module import *`)
+
+### Error Handling
+- Use specific exception types rather than catching all exceptions
+- Include meaningful error messages
+- Log exceptions with appropriate context
+- Clean up resources in finally blocks or use context managers
+
+### Testing
+- Write unit tests for all functions and classes
+- Use pytest for testing
+- Name test files with `test_` prefix
+- Name test functions with `test_` prefix
+- Use fixtures for common setup and teardown
+- Aim for high test coverage (>80%)
+
+## Examples
+
+### Good Code Style
+
+```python
+"""
+User management module.
+
+This module provides functionality for managing users in the system.
+"""
+
+import logging
+import os
+from typing import Dict, List, Optional
+
+import requests
+from pydantic import BaseModel
+
+from myapp.database import db_session
+from myapp.utils import format_username
+
+
+class User:
+    """
+    User class representing a system user.
+    
+    Attributes:
+        username (str): The user's username
+        email (str): The user's email address
+        is_active (bool): Whether the user is active
+    """
+    
+    def __init__(self, username: str, email: str, is_active: bool = True):
+        """
+        Initialize a new User.
+        
+        Args:
+            username (str): The user's username
+            email (str): The user's email address
+            is_active (bool, optional): Whether the user is active. Defaults to True.
+        """
+        self.username = username
+        self.email = email
+        self.is_active = is_active
+    
+    def get_display_name(self) -> str:
+        """
+        Get the user's display name.
+        
+        Returns:
+            str: The formatted display name
+        """
+        return format_username(self.username)
+
+
+def get_user_by_id(user_id: int) -> Optional[User]:
+    """
+    Get a user by their ID.
+    
+    Args:
+        user_id (int): The user's ID
+        
+    Returns:
+        Optional[User]: The user if found, None otherwise
+        
+    Raises:
+        ValueError: If user_id is negative
+    """
+    if user_id < 0:
+        raise ValueError("User ID cannot be negative")
+        
+    try:
+        # Query the database for the user
+        user_data = db_session.query(f"SELECT * FROM users WHERE id = {user_id}")
+        if not user_data:
+            return None
+            
+        return User(
+            username=user_data["username"],
+            email=user_data["email"],
+            is_active=user_data["is_active"]
+        )
+    except Exception as e:
+        logging.error(f"Error retrieving user {user_id}: {str(e)}")
+        return None
+```
+
+### Good Test Example
+
+```python
+"""
+Tests for the user management module.
+"""
+
+import pytest
+
+from myapp.users import User, get_user_by_id
+
+
+@pytest.fixture
+def mock_db_session(monkeypatch):
+    """Fixture to mock the database session."""
+    class MockDBSession:
+        def query(self, query_string):
+            if "WHERE id = 1" in query_string:
+                return {"username": "testuser", "email": "test@example.com", "is_active": True}
+            return None
+    
+    monkeypatch.setattr("myapp.database.db_session", MockDBSession())
+
+
+def test_user_initialization():
+    """Test User class initialization."""
+    user = User(username="testuser", email="test@example.com")
+    
+    assert user.username == "testuser"
+    assert user.email == "test@example.com"
+    assert user.is_active is True
+
+
+def test_get_user_by_id_success(mock_db_session):
+    """Test successful user retrieval."""
+    user = get_user_by_id(1)
+    
+    assert user is not None
+    assert user.username == "testuser"
+    assert user.email == "test@example.com"
+
+
+def test_get_user_by_id_not_found(mock_db_session):
+    """Test user not found case."""
+    user = get_user_by_id(999)
+    
+    assert user is None
+
+
+def test_get_user_by_id_negative_id():
+    """Test error handling for negative ID."""
+    with pytest.raises(ValueError) as excinfo:
+        get_user_by_id(-1)
+    
+    assert "User ID cannot be negative" in str(excinfo.value)
+```
+
+## Related MDC Files
+- [pytest-glob.mdc](mdc:../testing/pytest-glob.mdc)
+- [pydantic-glob.mdc](mdc:../validation/pydantic-glob.mdc)
+- [logging-glob.mdc](mdc:../utilities/logging-glob.mdc)
+
+## Exceptions
+- Generated Python files (marked with a `# GENERATED FILE` comment) are exempt from style requirements
+- Migration scripts may follow different import ordering due to their specific requirements
+- Test files may exceed the line length limit for test data and assertions
+
+## Enforcement
+- Black formatter is used to enforce code style
+- Flake8 is used to check for PEP 8 compliance
+- Mypy is used to check type hints
+- Pylint is used for additional code quality checks
+- Pre-commit hooks enforce these checks before commits
+- CI/CD pipeline includes these checks for all pull requests
+
+## Version History
+- 2023-10-01: Initial version
+- 2023-11-15: Added rules for error handling
+- 2024-01-20: Updated docstring format to Google style
+- 2024-03-05: Added type hint requirements 

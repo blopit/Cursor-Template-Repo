@@ -221,3 +221,8 @@ ENV/
 .commit_msg
 .pr_body
 .temp_*
+
+# Node.js dependencies
+node_modules/
+src/frontend/node_modules/
+src/backend/node_modules/
