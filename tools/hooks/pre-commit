@@ -9,7 +9,7 @@ echo "Running pre-commit hook to check for MDC documentation..."
 staged_files=$(git diff --cached --name-only --diff-filter=ACM)
 
 # Directories to check
-src_dirs=("src" "app" "components" "pages" "utils" "lib" "tools")
+src_dirs=("src" "app" "components" "pages" "utils" "lib" "tools" ".")
 
 # File extensions to check
 extensions=("js" "jsx" "ts" "tsx" "py" "css" "scss")
@@ -28,7 +28,7 @@ for file in $staged_files; do
     # Check if file is in a relevant directory
     in_src_dir=0
     for dir in "${src_dirs[@]}"; do
-        if [[ "$file" == $dir/* ]]; then
+        if [[ "$file" == $dir/* || "$dir" == "." && ! "$file" == */* ]]; then
             in_src_dir=1
             break
         fi

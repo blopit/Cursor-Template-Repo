@@ -1,0 +1,196 @@
+---
+description: Guidelines for creating React application components that interact with Express.js backend
+globs: fullstack-example/frontend/src/App.jsx, fullstack-example/frontend/src/components/**/*.jsx
+---
+# React Application Components Guidelines
+
+## Purpose
+This document outlines best practices for creating React components that interact with an Express.js backend. It provides guidance on component structure, data fetching, state management, and error handling.
+
+## Component Structure
+
+### Functional Components
+Use functional components with hooks as the default approach:
+
+```jsx
+// Good
+const UserProfile = ({ userId }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  useEffect(() => {
+    fetchUserData(userId);
+  }, [userId]);
+  
+  // Component logic...
+  
+  return (
+    // JSX...
+  );
+};
+```
+
+### Component Organization
+- Create a clear component hierarchy
+- Use atomic design principles (atoms, molecules, organisms, templates, pages)
+- Keep components focused on a single responsibility
+- Extract reusable logic into custom hooks
+
+## Data Fetching
+
+### API Integration
+Use a consistent approach for API calls to the Express.js backend:
+
+```jsx
+// api.js - Centralized API client
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+
+export const fetchData = async (endpoint, options = {}) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        // Add authentication headers if needed
+      },
+      ...options,
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('API request failed:', error);
+    throw error;
+  }
+};
+```
+
+### Custom Hooks for Data Fetching
+Create reusable hooks for common data fetching patterns:
+
+```jsx
+// useApi.js
+export const useApi = (endpoint, options = {}) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const result = await api.fetchData(endpoint, options);
+        setData(result);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [endpoint, JSON.stringify(options)]);
+  
+  return { data, loading, error, refetch: fetchData };
+};
+```
+
+## State Management
+
+### Local State
+- Use `useState` for component-specific state
+- Use `useReducer` for complex state logic
+- Keep state as close as possible to where it's used
+
+### Global State
+For application-wide state that interacts with the backend:
+- Use Context API for smaller applications
+- Consider Redux or Zustand for larger applications
+- Implement proper state synchronization with the backend
+
+## Error Handling
+
+### API Error Handling
+Implement consistent error handling for API requests:
+
+```jsx
+const UserList = () => {
+  const { data, loading, error } = useApi('/users');
+  
+  if (loading) return <LoadingSpinner />;
+  
+  if (error) return (
+    <ErrorMessage 
+      message="Failed to load users" 
+      details={error.message} 
+      retry={() => refetch()} 
+    />
+  );
+  
+  return (
+    // Render user list
+  );
+};
+```
+
+### Error Boundaries
+Use React Error Boundaries to catch and handle rendering errors:
+
+```jsx
+class ErrorBoundary extends React.Component {
+  state = { hasError: false, error: null };
+  
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  
+  componentDidCatch(error, info) {
+    console.error('Error boundary caught an error:', error, info);
+    // Log to error reporting service
+  }
+  
+  render() {
+    if (this.state.hasError) {
+      return <FallbackUI error={this.state.error} />;
+    }
+    
+    return this.props.children;
+  }
+}
+```
+
+## Performance Optimization
+
+### Memoization
+- Use `React.memo` for expensive components
+- Use `useMemo` for expensive calculations
+- Use `useCallback` for functions passed as props
+
+### Code Splitting
+Implement code splitting for larger applications:
+
+```jsx
+const UserDashboard = React.lazy(() => import('./UserDashboard'));
+
+const App = () => (
+  <React.Suspense fallback={<LoadingSpinner />}>
+    <UserDashboard />
+  </React.Suspense>
+);
+```
+
+## Testing
+
+### Component Testing
+- Test component rendering and user interactions
+- Mock API calls to the Express.js backend
+- Test error states and loading states
+- Use React Testing Library for component tests
+
+### Integration Testing
+- Test the integration between React components and API endpoints
+- Use MSW (Mock Service Worker) to mock the Express.js API
+- Verify data flow from API to UI components

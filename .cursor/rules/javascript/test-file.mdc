@@ -1,0 +1,46 @@
+---
+description: Documentation for the test JavaScript file
+globs: test_file.js
+---
+# Test File Documentation
+
+## Purpose
+This is a test JavaScript file created to verify the functionality of the pre-commit hook that enforces MDC documentation requirements. It demonstrates how to properly document a JavaScript file according to the project's file creation standards.
+
+## Usage
+This file can be imported and used as follows:
+
+```javascript
+const testFunction = require('./test_file');
+
+// Call the test function
+const result = testFunction();
+console.log(result); // true
+```
+
+## Dependencies
+List of dependencies and relationships with other files/components:
+
+- No external dependencies
+- Used by the pre-commit hook testing process
+
+## Maintenance
+Guidelines for maintaining and updating this file:
+
+- Update the function implementation if needed for more comprehensive testing
+- Keep the documentation in sync with any changes to the file
+- Consider adding more test functions to demonstrate different documentation patterns
+
+## Additional Notes
+
+### Testing the Pre-commit Hook
+This file is primarily used to test whether the pre-commit hook correctly:
+1. Detects files that require MDC documentation
+2. Verifies that the referenced MDC file exists
+3. Allows or blocks commits based on these checks
+
+### Educational Purpose
+This file also serves as an educational example for new developers to understand:
+- How to properly document JavaScript files
+- How to reference MDC documentation files
+- The structure and content required in MDC documentation 

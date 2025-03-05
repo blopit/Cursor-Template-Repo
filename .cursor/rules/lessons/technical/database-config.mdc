@@ -1,1 +1,303 @@
- 
+---
+description: Database configuration guidelines for Express.js applications
+globs: fullstack-example/backend/database/**/*.js
+---
+# Database Configuration Guidelines
+
+## Purpose
+This document outlines best practices for database configuration and interaction in Express.js applications. It provides guidance on connection management, query optimization, and environment-specific database settings.
+
+## Database Connection
+
+### Connection Pool
+Use a connection pool to manage database connections efficiently:
+
+```javascript
+// database.js
+import { Pool } from 'pg';
+import config from '../config';
+
+const pool = new Pool({
+  host: config.database.host,
+  port: config.database.port,
+  database: config.database.name,
+  user: config.database.user,
+  password: config.database.password,
+  max: config.database.poolSize || 20, // Maximum number of clients
+  idleTimeoutMillis: 30000, // How long a client is idle before being closed
+  connectionTimeoutMillis: 2000, // How long to wait for a connection
+  ssl: config.server.env === 'production' ? { rejectUnauthorized: true } : false,
+});
+
+// Handle pool errors
+pool.on('error', (err, client) => {
+  console.error('Unexpected error on idle client', err);
+  process.exit(-1);
+});
+
+export default {
+  query: (text, params) => pool.query(text, params),
+  getClient: async () => {
+    const client = await pool.connect();
+    const query = client.query;
+    const release = client.release;
+    
+    // Override client.query to log queries
+    client.query = (...args) => {
+      console.log('QUERY:', args[0]);
+      return query.apply(client, args);
+    };
+    
+    // Override client.release to ensure clients are always released
+    client.release = () => {
+      client.query = query;
+      return release.apply(client);
+    };
+    
+    return client;
+  },
+  end: () => pool.end(),
+};
+```
+
+### Environment-Specific Configuration
+Configure database connections differently based on the environment:
+
+```javascript
+// config.js
+export default {
+  // ... other config
+  database: {
+    host: process.env.DATABASE_HOST || 'localhost',
+    port: parseInt(process.env.DATABASE_PORT || '5432', 10),
+    name: process.env.DATABASE_NAME || (
+      process.env.NODE_ENV === 'test' 
+        ? 'app_test' 
+        : process.env.NODE_ENV === 'production'
+          ? 'app_prod'
+          : 'app_dev'
+    ),
+    user: process.env.DATABASE_USER || 'postgres',
+    password: process.env.DATABASE_PASSWORD || 'postgres',
+    poolSize: parseInt(process.env.DATABASE_POOL_SIZE || (
+      process.env.NODE_ENV === 'production' ? '20' : '10'
+    ), 10),
+    ssl: process.env.NODE_ENV === 'production',
+  },
+};
+```
+
+## Query Management
+
+### Parameterized Queries
+Always use parameterized queries to prevent SQL injection:
+
+```javascript
+// Good
+const result = await db.query(
+  'SELECT * FROM users WHERE email = $1',
+  [email]
+);
+
+// Avoid
+const result = await db.query(
+  `SELECT * FROM users WHERE email = '${email}'`
+);
+```
+
+### Transaction Management
+Use transactions for operations that require atomicity:
+
+```javascript
+// Example transaction
+const createUserWithProfile = async (userData, profileData) => {
+  const client = await db.getClient();
+  
+  try {
+    await client.query('BEGIN');
+    
+    const userResult = await client.query(
+      'INSERT INTO users(name, email) VALUES($1, $2) RETURNING id',
+      [userData.name, userData.email]
+    );
+    
+    const userId = userResult.rows[0].id;
+    
+    await client.query(
+      'INSERT INTO profiles(user_id, bio) VALUES($1, $2)',
+      [userId, profileData.bio]
+    );
+    
+    await client.query('COMMIT');
+    return userId;
+  } catch (e) {
+    await client.query('ROLLBACK');
+    throw e;
+  } finally {
+    client.release();
+  }
+};
+```
+
+## Database Models
+
+### Model Structure
+Organize database models with clear separation of concerns:
+
+```javascript
+// models/user.js
+import db from '../database';
+
+export default {
+  findById: async (id) => {
+    const result = await db.query(
+      'SELECT * FROM users WHERE id = $1',
+      [id]
+    );
+    return result.rows[0];
+  },
+  
+  findByEmail: async (email) => {
+    const result = await db.query(
+      'SELECT * FROM users WHERE email = $1',
+      [email]
+    );
+    return result.rows[0];
+  },
+  
+  create: async (userData) => {
+    const result = await db.query(
+      'INSERT INTO users(name, email, password_hash) VALUES($1, $2, $3) RETURNING *',
+      [userData.name, userData.email, userData.passwordHash]
+    );
+    return result.rows[0];
+  },
+  
+  // Additional methods...
+};
+```
+
+## Migrations
+
+### Migration Structure
+Use a migration system to manage database schema changes:
+
+```javascript
+// migrations/001_create_users_table.js
+export const up = async (db) => {
+  await db.query(`
+    CREATE TABLE users (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      email VARCHAR(255) UNIQUE NOT NULL,
+      password_hash VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+};
+
+export const down = async (db) => {
+  await db.query('DROP TABLE IF EXISTS users');
+};
+```
+
+### Migration Runner
+Implement a system to run migrations:
+
+```javascript
+// migration-runner.js
+import fs from 'fs/promises';
+import path from 'path';
+import db from './database';
+
+const runMigrations = async (direction = 'up') => {
+  const client = await db.getClient();
+  
+  try {
+    // Create migrations table if it doesn't exist
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS migrations (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        applied_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    
+    // Get list of applied migrations
+    const { rows: appliedMigrations } = await client.query(
+      'SELECT name FROM migrations'
+    );
+    const appliedMigrationNames = appliedMigrations.map(m => m.name);
+    
+    // Get all migration files
+    const migrationFiles = await fs.readdir(path.join(__dirname, 'migrations'));
+    
+    if (direction === 'up') {
+      // Apply migrations that haven't been applied yet
+      for (const file of migrationFiles.sort()) {
+        if (!appliedMigrationNames.includes(file)) {
+          const migration = require(path.join(__dirname, 'migrations', file));
+          await migration.up(client);
+          await client.query(
+            'INSERT INTO migrations(name) VALUES($1)',
+            [file]
+          );
+          console.log(`Applied migration: ${file}`);
+        }
+      }
+    } else {
+      // Rollback migrations in reverse order
+      for (const file of migrationFiles.sort().reverse()) {
+        if (appliedMigrationNames.includes(file)) {
+          const migration = require(path.join(__dirname, 'migrations', file));
+          await migration.down(client);
+          await client.query(
+            'DELETE FROM migrations WHERE name = $1',
+            [file]
+          );
+          console.log(`Rolled back migration: ${file}`);
+        }
+      }
+    }
+  } finally {
+    client.release();
+  }
+};
+
+export default runMigrations;
+```
+
+## Performance Optimization
+
+### Indexing
+Create appropriate indexes for frequently queried columns:
+
+```sql
+-- Example indexes
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_posts_user_id ON posts(user_id);
+CREATE INDEX idx_posts_created_at ON posts(created_at DESC);
+```
+
+### Query Optimization
+Optimize queries for performance:
+
+- Use `EXPLAIN ANALYZE` to understand query execution plans
+- Limit result sets when appropriate
+- Use appropriate joins instead of multiple queries
+- Consider using materialized views for complex reports
+
+## Security Considerations
+
+### Connection Security
+- Use SSL for production database connections
+- Restrict database access by IP address
+- Use strong, unique passwords for database users
+- Consider using a connection proxy for additional security
+
+### Data Protection
+- Hash sensitive data (passwords) before storing
+- Consider encrypting personally identifiable information
+- Implement row-level security for multi-tenant applications
+- Regularly audit database access

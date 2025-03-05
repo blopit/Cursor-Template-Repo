@@ -1,1 +1,40 @@
- 
+---
+description: Documentation for the script that installs Git hooks
+globs: tools/install_hooks.sh
+---
+# Hook Installation Script Documentation
+
+## Purpose
+The hook installation script simplifies the process of installing Git hooks by copying them from the tools/hooks directory to the .git/hooks directory and making them executable.
+
+## Usage
+To install all Git hooks:
+
+```bash
+# Run the installation script
+./tools/install_hooks.sh
+```
+
+This will install:
+- The pre-commit hook that enforces MDC documentation requirements
+
+## Dependencies
+List of dependencies and relationships with other files/components:
+
+- `tools/hooks/pre-commit`: The pre-commit hook that enforces MDC documentation
+- `.cursor/rules/file-creation-standards.mdc`: Defines the standards that the pre-commit hook enforces
+
+## Maintenance
+Guidelines for maintaining and updating this file:
+
+- When adding new hooks, update this script to copy and make them executable
+- Consider adding a check to verify that hooks are installed correctly
+- Add backup functionality to preserve any custom hooks
+
+## Additional Notes
+
+### Automatic Installation
+Consider adding this script to your project's setup or onboarding process to ensure all developers have the hooks installed.
+
+### CI/CD Integration
+For CI/CD pipelines, you may want to create a separate script that performs similar checks without requiring Git hooks. 
