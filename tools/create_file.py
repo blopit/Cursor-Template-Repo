@@ -298,7 +298,11 @@ License information here.
 }
 
 # MDC documentation template
-MDC_TEMPLATE = '''# {name} Documentation
+MDC_TEMPLATE = '''---
+description: {description}
+globs: {glob_pattern}
+---
+# {name} Documentation
 
 ## Purpose
 {description}
@@ -307,23 +311,24 @@ MDC_TEMPLATE = '''# {name} Documentation
 Examples of how to use the functionality provided by this file.
 
 ```{code_block_type}
-// Usage example
+// Usage example code here
 ```
 
 ## Dependencies
-List of dependencies and relationships with other files/components.
+List of dependencies and relationships with other files/components:
 
-- Dependency 1
-- Dependency 2
+- List dependencies here
+- Include both internal and external dependencies
 
 ## Maintenance
-Guidelines for maintaining and updating this file.
+Guidelines for maintaining and updating this file:
 
-- Maintenance guideline 1
-- Maintenance guideline 2
+- Document update procedures
+- Note testing requirements
+- List related files to update
 
 ## Additional Notes
-Any other relevant information.
+Any other relevant information about this file.
 '''
 
 
@@ -381,6 +386,9 @@ def create_file(file_path, file_type, name, description, author):
     
     print(f"Created file: {file_path}")
     
+    # Generate appropriate glob pattern based on file type and path
+    glob_pattern = os.path.join(os.path.dirname(file_path), f"*.{file_type}")
+    
     # Create MDC documentation
     code_block_type = file_type
     if file_type in ["jsx", "tsx"]:
@@ -389,7 +397,8 @@ def create_file(file_path, file_type, name, description, author):
     mdc_content = MDC_TEMPLATE.format(
         name=pascal_name,
         description=description,
-        code_block_type=code_block_type
+        code_block_type=code_block_type,
+        glob_pattern=glob_pattern
     )
     
     with open(mdc_path, 'w', encoding='utf-8') as f:

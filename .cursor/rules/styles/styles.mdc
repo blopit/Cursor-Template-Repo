@@ -1,0 +1,61 @@
+---
+description: Documentation for the application's CSS styles
+globs: fullstack-example/frontend/src/styles.css
+---
+# Application Styles Documentation
+
+## Purpose
+This file provides the CSS styling for the entire application. It defines the visual appearance of all components, including layout, colors, typography, and interactive elements.
+
+## Usage
+The styles are imported in the main entry point and automatically applied to the application:
+
+```jsx
+// In main.jsx
+import './styles.css';
+```
+
+## Dependencies
+List of dependencies and relationships with other files/components:
+
+- `App.jsx`: Uses the defined class names for styling components
+- No external CSS frameworks or libraries are used
+
+## Maintenance
+Guidelines for maintaining and updating this file:
+
+- Follow the established color scheme when adding new styles
+- Maintain the BEM naming convention for new class names
+- Group related styles together
+- Consider extracting common values into CSS variables for easier maintenance
+- Test styles across different screen sizes for responsiveness
+
+## Additional Notes
+
+### Color Palette
+The application uses a consistent color palette:
+- Primary blue: #3498db (buttons, interactive elements)
+- Dark blue: #2980b9 (hover states)
+- Text color: #333 (body text)
+- Heading color: #2c3e50
+- Background: #f5f5f5
+- Error red: #f44336
+
+### Layout Structure
+The application uses a centered card layout with:
+- Maximum width of 800px
+- Responsive padding
+- Card-like appearance with shadow and rounded corners
+
+### Component-Specific Styles
+- `.fetch-button`: Styling for the API fetch button with hover and disabled states
+- `.error-message`: Red-bordered box for displaying error messages
+- `.data-display`: Formatted container for displaying API response data
+
+### Future Enhancements
+Consider implementing:
+- CSS variables for colors and spacing
+- Media queries for better mobile responsiveness
+- Dark mode theme
+- Animation for state transitions
+- More consistent spacing system 
